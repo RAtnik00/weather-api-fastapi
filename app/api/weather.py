@@ -11,7 +11,17 @@ service = WeatherService()
 def health_check():
     return {"status": "ok"}
 
-@router.get("/weather")
-def weather(location: str = Query()):
+@router.get("/weather/current")
+def current_weather(location: str = Query(...)):
     result = service.get_current_weather(location)
-    return {"result": result}
+    return result
+
+@router.get("/weather/forecast")
+def forecast_weather(location: str = Query(...)):
+    result = service.get_forecast(location)
+    return result
+
+@router.get("/weather/yesterday")
+def yesterday_weather(location: str = Query(...)):
+    result = service.get_yesterday_weather(location)
+    return result
