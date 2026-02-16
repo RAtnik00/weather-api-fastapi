@@ -49,3 +49,29 @@ def get_history(request: Request):
 def get_favorites(request: Request):
     favorites = cookies_service.get_favorites(request.cookies)
     return {"favorites": favorites}
+
+@router.post("/favorites/{location}")
+def add_favorite(location: str, request: Request, response: Response):
+    favorites = cookies_service.get_favorites(request.cookies)
+    favorites = cookies_service.add_favorite(favorites, location)
+
+    response.set_cookie(
+        key=cookies_service.FAVORITES_KEY,
+        value=cookies_service.encode_favorites(favorites),
+        httponly=True,
+        samesite="lax",
+    )
+    return {"favorites": favorites}
+
+@router.delete("/favorites/{location}")
+def remove_favorite(location: str, request: Request, response: Response):
+    favorites = cookies_service.get_favorites(request.cookies)
+    favorites = cookies_service.remove_favorite(favorites, location)
+
+    response.set_cookie(
+        key=cookies_service.FAVORITES_KEY,
+        value=cookies_service.encode_favorites(favorites),
+        httponly=True,
+        samesite="lax",
+    )
+    return {"favorites": favorites}
