@@ -30,16 +30,40 @@ class CookiesService:
         return new_history[:10]
 
     def get_favorites(self, cookies: dict[str, str]) -> list[str]:
-        pass
+        raw = cookies.get(self.FAVORITES_KEY)
+
+        if not raw:
+            return []
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            return []
+
+        return data if isinstance(data, list) else []
 
     def add_favorite(self, favorites: list[str], location: str) -> list[str]:
-        pass
+        location = location.strip()
+        if not location:
+            return favorites[:50]
+
+        seen = set()
+        new_favorites: list[str] = []
+
+        for item in [location] + favorites:
+            key = item.strip().lower()
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            new_favorites.append(item.strip())
+
+        return new_favorites[:50]
 
     def remove_favorite(self, favorites: list[str], location: str) -> list[str]:
-        pass
+        location_key = location.strip().lower()
+        return [item for item in favorites if item.strip().lower() != location_key]
 
     def encode_history(self, history: list[str]) -> str:
         return json.dumps(history, ensure_ascii=False)
 
     def encode_favorites(self, favorites: list[str]) -> str:
-        pass
+        return json.dumps(favorites, ensure_ascii=False)
