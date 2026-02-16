@@ -1,17 +1,18 @@
-from fastapi import Query, APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 
 from app.dependencies.services import get_weather_service
+from app.dependencies.cookies import get_cookies_service
 from app.schemas.weather import CurrentWeatherResponse
 from app.services.weather_service import WeatherService
 from app.services.cookies_service import CookiesService
 
 router = APIRouter()
 
-cookies_service = CookiesService()
 
 @router.get("/")
 def health_check():
     return {"status": "ok"}
+
 
 @router.get("/weather/current", response_model=CurrentWeatherResponse)
 def current_weather(
@@ -19,10 +20,13 @@ def current_weather(
     response: Response,
     location: str = Query(...),
     service: WeatherService = Depends(get_weather_service),
+    cookies_service: CookiesService = Depends(get_cookies_service),
 ):
     result = service.get_current_weather(location)
+
     history = cookies_service.get_history(request.cookies)
     history = cookies_service.add_to_history(history, location)
+
     response.set_cookie(
         key=cookies_service.HISTORY_KEY,
         value=cookies_service.encode_history(history),
@@ -31,28 +35,48 @@ def current_weather(
     )
     return result
 
+
 @router.get("/weather/forecast")
-def forecast_weather(location: str = Query(...), service: WeatherService = Depends(get_weather_service)):
-    result = service.get_forecast(location)
-    return result
+def forecast_weather(
+    location: str = Query(...),
+    service: WeatherService = Depends(get_weather_service),
+):
+    return service.get_forecast(location)
+
 
 @router.get("/weather/yesterday")
-def yesterday_weather(location: str = Query(...), service: WeatherService = Depends(get_weather_service)):
-    result = service.get_yesterday_weather(location)
-    return result
+def yesterday_weather(
+    location: str = Query(...),
+    service: WeatherService = Depends(get_weather_service),
+):
+    return service.get_yesterday_weather(location)
+
 
 @router.get("/history")
-def get_history(request: Request):
+def get_history(
+    request: Request,
+    cookies_service: CookiesService = Depends(get_cookies_service),
+):
     history = cookies_service.get_history(request.cookies)
     return {"history": history}
 
+
 @router.get("/favorites")
-def get_favorites(request: Request):
+def get_favorites(
+    request: Request,
+    cookies_service: CookiesService = Depends(get_cookies_service),
+):
     favorites = cookies_service.get_favorites(request.cookies)
     return {"favorites": favorites}
 
+
 @router.post("/favorites/{location}")
-def add_favorite(location: str, request: Request, response: Response):
+def add_favorite(
+    location: str,
+    request: Request,
+    response: Response,
+    cookies_service: CookiesService = Depends(get_cookies_service),
+):
     favorites = cookies_service.get_favorites(request.cookies)
     favorites = cookies_service.add_favorite(favorites, location)
 
@@ -64,8 +88,14 @@ def add_favorite(location: str, request: Request, response: Response):
     )
     return {"favorites": favorites}
 
+
 @router.delete("/favorites/{location}")
-def remove_favorite(location: str, request: Request, response: Response):
+def remove_favorite(
+    location: str,
+    request: Request,
+    response: Response,
+    cookies_service: CookiesService = Depends(get_cookies_service),
+):
     favorites = cookies_service.get_favorites(request.cookies)
     favorites = cookies_service.remove_favorite(favorites, location)
 
