@@ -1,11 +1,12 @@
-from fastapi import Query
+from fastapi import Query, APIRouter, Depends, Request
 
-from fastapi import APIRouter
-from fastapi import Depends
 from app.dependencies.services import get_weather_service
 from app.services.weather_service import WeatherService
+from app.services.cookies_service import CookiesService
 
 router = APIRouter()
+
+cookies_service = CookiesService()
 
 @router.get("/")
 def health_check():
@@ -25,3 +26,13 @@ def forecast_weather(location: str = Query(...), service: WeatherService = Depen
 def yesterday_weather(location: str = Query(...), service: WeatherService = Depends(get_weather_service)):
     result = service.get_yesterday_weather(location)
     return result
+
+@router.get("/history")
+def get_history(request: Request):
+    history = cookies_service.get_history(request.cookies)
+    return {"history": history}
+
+@router.get("/favorites")
+def get_favorites(request: Request):
+    favorites = cookies_service.get_favorites(request.cookies)
+    return {"favorites": favorites}
