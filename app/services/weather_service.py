@@ -3,10 +3,10 @@ class WeatherService:
         self.client = client
 
     def get_current_weather(self, location):
-        return {}
+        return self.client.get_current_weather(location)
 
     def get_forecast(self, location):
-        return {}
+        return self.client.get_forecast(location)
 
     def get_yesterday_weather(self, location):
-        return {}
+        return self.client.get_yesterday_weather(location)

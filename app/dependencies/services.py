@@ -9,6 +9,5 @@ def get_openweather_client():
     api_key = OPENWEATHER_API_KEY
     return OpenWeatherClient(base_url, api_key)
 
-
 def get_weather_service(client = Depends(get_openweather_client)):
     return WeatherService(client)
