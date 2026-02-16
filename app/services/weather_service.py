@@ -1,5 +1,9 @@
-class WeatherService:
-    def __init__(self, client):
+from typing import Protocol
+
+from app.clients.weather_client import WeatherClient
+
+class WeatherService(Protocol):
+    def __init__(self, client: WeatherClient):
         self.client = client
 
     def get_current_weather(self, location):
