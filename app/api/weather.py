@@ -1,6 +1,7 @@
 from fastapi import Query, APIRouter, Depends, Request, Response
 
 from app.dependencies.services import get_weather_service
+from app.schemas.weather import CurrentWeatherResponse
 from app.services.weather_service import WeatherService
 from app.services.cookies_service import CookiesService
 
@@ -12,7 +13,7 @@ cookies_service = CookiesService()
 def health_check():
     return {"status": "ok"}
 
-@router.get("/weather/current")
+@router.get("/weather/current", response_model=CurrentWeatherResponse)
 def current_weather(
     request: Request,
     response: Response,
