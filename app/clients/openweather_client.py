@@ -1,3 +1,4 @@
+import time
 import httpx
 
 class OpenWeatherClient:
@@ -17,7 +18,12 @@ class OpenWeatherClient:
         return response.json()
 
     def get_forecast(self, location: str) -> dict:
-        return {}
-
-    def get_yesterday_weather(self, location: str) -> dict:
-        return {}
+        url = f"{self.base_url}/forecast"
+        params = {
+            "q": location,
+            "appid": self.api_key,
+            "units": "metric",
+        }
+        response = httpx.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
