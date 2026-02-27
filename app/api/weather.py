@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 
 from app.dependencies.services import get_weather_service
 from app.dependencies.cookies import get_cookies_service
-from app.schemas.weather import CurrentWeatherResponse
+from app.schemas.weather import CurrentWeatherResponse, ForecastResponse
 from app.services.weather_service import WeatherService
 from app.services.cookies_service import CookiesService
 
@@ -36,21 +36,12 @@ def current_weather(
     return result
 
 
-@router.get("/weather/forecast")
+@router.get("/weather/forecast", response_model=ForecastResponse)
 def forecast_weather(
     location: str = Query(...),
     service: WeatherService = Depends(get_weather_service),
 ):
     return service.get_forecast(location)
-
-
-@router.get("/weather/yesterday")
-def yesterday_weather(
-    location: str = Query(...),
-    service: WeatherService = Depends(get_weather_service),
-):
-    return service.get_yesterday_weather(location)
-
 
 @router.get("/history")
 def get_history(
