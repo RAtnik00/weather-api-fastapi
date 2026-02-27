@@ -6,5 +6,3 @@ class WeatherClient(Protocol):
         pass
     def get_forecast(self, location: str) -> dict:
         pass
-    def get_yesterday_weather(self, location: str) -> dict:
-        pass

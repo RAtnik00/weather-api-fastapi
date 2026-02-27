@@ -43,15 +43,6 @@ def forecast_weather(
 ):
     return service.get_forecast(location)
 
-
-@router.get("/weather/yesterday")
-def yesterday_weather(
-    location: str = Query(...),
-    service: WeatherService = Depends(get_weather_service),
-):
-    return service.get_yesterday_weather(location)
-
-
 @router.get("/history")
 def get_history(
     request: Request,

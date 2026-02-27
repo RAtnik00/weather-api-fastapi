@@ -19,6 +19,3 @@ class WeatherService(Protocol):
 
     def get_forecast(self, location: str) -> dict:
         return self.client.get_forecast(location)
-
-    def get_yesterday_weather(self, location: str) -> dict:
-        return self.client.get_yesterday_weather(location)
