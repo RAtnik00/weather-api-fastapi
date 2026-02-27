@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response, HTTPException
 
 from app.dependencies.services import get_weather_service
 from app.dependencies.cookies import get_cookies_service
 from app.schemas.weather import CurrentWeatherResponse, ForecastResponse
 from app.services.weather_service import WeatherService
 from app.services.cookies_service import CookiesService
+from app.exceptions.weather import CityNotFoundError, WeatherAuthError, WeatherRateLimitError, WeatherUpstreamError
 
 router = APIRouter()
 
@@ -18,11 +19,20 @@ def health_check():
 def current_weather(
     request: Request,
     response: Response,
-    location: str = Query(...),
+    location: str = Query(..., min_length=2, max_length=64, strip_whitespace=True),
     service: WeatherService = Depends(get_weather_service),
     cookies_service: CookiesService = Depends(get_cookies_service),
 ):
-    result = service.get_current_weather(location)
+    try:
+        result = service.get_current_weather(location)
+    except CityNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except WeatherAuthError:
+        raise HTTPException(status_code=502, detail="Weather provider authentication failed")
+    except WeatherRateLimitError:
+        raise HTTPException(status_code=503, detail="Weather provider rate limit exceeded")
+    except WeatherUpstreamError:
+        raise HTTPException(status_code=502, detail="Weather provider error")
 
     history = cookies_service.get_history(request.cookies)
     history = cookies_service.add_to_history(history, location)
@@ -38,10 +48,19 @@ def current_weather(
 
 @router.get("/weather/forecast", response_model=ForecastResponse)
 def forecast_weather(
-    location: str = Query(...),
+    location: str = Query(..., min_length=2, max_length=64, strip_whitespace=True),
     service: WeatherService = Depends(get_weather_service),
 ):
-    return service.get_forecast(location)
+    try:
+        return service.get_forecast(location)
+    except CityNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except WeatherAuthError:
+        raise HTTPException(status_code=502, detail="Weather provider authentication failed")
+    except WeatherRateLimitError:
+        raise HTTPException(status_code=503, detail="Weather provider rate limit exceeded")
+    except WeatherUpstreamError:
+        raise HTTPException(status_code=502, detail="Weather provider error")
 
 @router.get("/history")
 def get_history(

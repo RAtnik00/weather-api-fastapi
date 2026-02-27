@@ -1,13 +1,12 @@
 from collections import Counter, defaultdict
 from datetime import datetime, date
 from statistics import mean
-from typing import Protocol
 
 from app.clients.weather_client import WeatherClient
 from app.schemas.weather import CurrentWeatherResponse, ForecastDay, ForecastResponse
 
-class WeatherService(Protocol):
-    def __init__(self, client: WeatherClient):
+class WeatherService:
+    def __init__(self, client: WeatherClient) -> None:
         self.client = client
 
     def get_current_weather(self, location: str) -> CurrentWeatherResponse:
@@ -35,7 +34,6 @@ class WeatherService(Protocol):
             if not dt_txt:
                 continue
 
-            # dt_txt обычно "YYYY-MM-DD HH:MM:SS"
             d = datetime.strptime(dt_txt, "%Y-%m-%d %H:%M:%S").date()
 
             main = it.get("main") or {}
