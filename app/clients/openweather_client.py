@@ -1,3 +1,4 @@
+import time
 import httpx
 
 class OpenWeatherClient:
@@ -17,7 +18,31 @@ class OpenWeatherClient:
         return response.json()
 
     def get_forecast(self, location: str) -> dict:
-        return {}
+        url = f"{self.base_url}/forecast"
+        params = {
+            "q": location,
+            "appid": self.api_key,
+            "units": "metric",
+        }
+        response = httpx.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
 
     def get_yesterday_weather(self, location: str) -> dict:
-        return {}
+        current = self.get_current_weather(location)
+        lat = current["coord"]["lat"]
+        lon = current["coord"]["lon"]
+
+        dt = int(time.time()) - 86400
+
+        url = "https://api.openweathermap.org/data/2.5/onecall/timemachine"
+        params = {
+            "lat": lat,
+            "lon": lon,
+            "dt": dt,
+            "appid": self.api_key,
+            "units": "metric",
+        }
+        response = httpx.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
