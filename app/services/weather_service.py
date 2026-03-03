@@ -2,9 +2,10 @@ from collections import Counter, defaultdict
 from datetime import datetime, date
 from statistics import mean
 
+from app.cache.weather_cache import WeatherCache
 from app.clients.weather_client import WeatherClient
 from app.schemas.weather import CurrentWeatherResponse, ForecastDay, ForecastResponse
-from app.cache.weather_cache import WeatherCache
+
 
 class WeatherService:
     def __init__(self, client: WeatherClient, cache: WeatherCache) -> None:
@@ -12,16 +13,28 @@ class WeatherService:
         self.cache = cache
 
     def get_current_weather(self, location: str) -> CurrentWeatherResponse:
+        key = self.cache.make_key(location)
+        cached = self.cache.get_current(key)
+        if cached is not None:
+            return cached
+
         raw = self.client.get_current_weather(location)
-        return CurrentWeatherResponse(
+        result = CurrentWeatherResponse(
             city=raw["name"],
             temp_c=raw["main"]["temp"],
             feels_like_c=raw["main"]["feels_like"],
             description=raw["weather"][0]["description"],
             wind_speed=raw["wind"]["speed"],
         )
+        self.cache.set_current(key, result)
+        return result
 
     def get_forecast(self, location: str) -> ForecastResponse:
+        key = self.cache.make_key(location)
+        cached = self.cache.get_forecast(key)
+        if cached is not None:
+            return cached
+
         raw = self.client.get_forecast(location)
 
         city = (raw.get("city") or {}).get("name") or location
@@ -71,4 +84,6 @@ class WeatherService:
                 )
             )
 
-        return ForecastResponse(city=city, days=result_days)
+        result = ForecastResponse(city=city, days=result_days)
+        self.cache.set_forecast(key, result)
+        return result
