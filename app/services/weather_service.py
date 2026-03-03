@@ -4,10 +4,12 @@ from statistics import mean
 
 from app.clients.weather_client import WeatherClient
 from app.schemas.weather import CurrentWeatherResponse, ForecastDay, ForecastResponse
+from app.cache.weather_cache import WeatherCache
 
 class WeatherService:
-    def __init__(self, client: WeatherClient) -> None:
+    def __init__(self, client: WeatherClient, cache: WeatherCache) -> None:
         self.client = client
+        self.cache = cache
 
     def get_current_weather(self, location: str) -> CurrentWeatherResponse:
         raw = self.client.get_current_weather(location)
