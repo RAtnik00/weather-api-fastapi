@@ -1,28 +1,38 @@
-const BASE = "/api"
+import api from "./apiClient";
 
-async function request(path, options = {}) {
-    const res = await fetch(`${BASE}${path}`, {
-        ...options,
-        credentials: "include"
-    })
+export async function fetchCurrent(city) {
+    const res = await api.get("/weather/current", { params: { location: city } });
 
-    if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`)
-    }
+    console.log("RAW current res:", res);
+    console.log("RAW current res.data:", res.data);
 
-    return res.json()
+    const d = res.data;
+
+    return {
+        city: d.city,
+        temp_c: d.temp_c,
+        feelslike_c: d.feels_like_c,
+        condition: d.description,
+        wind_kph: d.wind_speed,
+        humidity: d.humidity ?? null,
+    };
 }
 
-export const weatherApi = {
-    current: (location) =>
-        request(`/weather/current?location=${location}`),
+export async function fetchForecast(city) {
+    const res = await api.get("/weather/forecast", { params: { location: city } });
 
-    forecast: (location) =>
-        request(`/weather/forecast?location=${location}`),
+    console.log("RAW forecast res:", res);
+    console.log("RAW forecast res.data:", res.data);
 
-    history: () =>
-        request("/history"),
+    const d = res.data;
 
-    favorites: () =>
-        request("/favorites")
+    return {
+        city: d.city,
+        days: (d.days || []).map((day) => ({
+            date: day.date,
+            min_c: day.temp_min_c,
+            max_c: day.temp_max_c,
+            condition: day.description,
+        })),
+    };
 }
