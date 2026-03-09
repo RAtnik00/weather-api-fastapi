@@ -1,13 +1,13 @@
 from collections import Counter, defaultdict
 from statistics import mean
 
-from app.cache.weather_cache import WeatherCache
+from app.cache.weather_cache_protocol import WeatherCacheProtocol
 from app.clients.weather_client import WeatherClient
 from app.schemas.weather import CurrentWeatherResponse, ForecastDay, ForecastResponse
 
 
 class WeatherService:
-    def __init__(self, client: WeatherClient, cache: WeatherCache) -> None:
+    def __init__(self, client: WeatherClient, cache: WeatherCacheProtocol) -> None:
         self.client = client
         self.cache = cache
 
