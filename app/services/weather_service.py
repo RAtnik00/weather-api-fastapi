@@ -25,6 +25,7 @@ class WeatherService:
             feels_like_c=current.feels_like_c,
             description=current.description,
             wind_speed=current.wind_speed,
+            humidity=current.humidity,
         )
 
         self.cache.set_current(key, result)
