@@ -1,5 +1,6 @@
 from app.cache.weather_cache_protocol import WeatherCacheProtocol
 from app.clients.weather_client import WeatherClient
+from app.mappers.current_weather_mapper import CurrentWeatherMapper
 from app.mappers.forecast_mapper import ForecastMapper
 from app.schemas.weather import CurrentWeatherResponse, ForecastResponse
 
@@ -17,15 +18,7 @@ class WeatherService:
             return cached
 
         current = self.client.get_current_weather(location)
-
-        result = CurrentWeatherResponse(
-            city=current.city,
-            temp_c=current.temp_c,
-            feels_like_c=current.feels_like_c,
-            description=current.description,
-            wind_speed=current.wind_speed,
-            humidity=current.humidity,
-        )
+        result = CurrentWeatherMapper.to_response(current)
 
         self.cache.set_current(key, result)
         return result
