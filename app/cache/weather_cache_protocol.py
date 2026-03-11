@@ -1,19 +1,19 @@
 from typing import Protocol
 
-from app.schemas.weather import CurrentWeatherResponse, ForecastResponse
+from app.models.weather import CurrentWeatherData, ForecastData
 
 class WeatherCacheProtocol(Protocol):
     def make_key(self, location: str) -> str:
         pass
 
-    def get_current(self, key: str) -> CurrentWeatherResponse | None:
+    def get_current(self, key: str) -> CurrentWeatherData | None:
         pass
 
-    def set_current(self, key: str, value: CurrentWeatherResponse) -> None:
+    def set_current(self, key: str, value: CurrentWeatherData) -> None:
         pass
 
-    def get_forecast(self, key: str) -> ForecastResponse | None:
+    def get_forecast(self, key: str) -> ForecastData | None:
         pass
 
-    def set_forecast(self, key: str, value: ForecastResponse) -> None:
+    def set_forecast(self, key: str, value: ForecastData) -> None:
         pass

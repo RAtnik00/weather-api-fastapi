@@ -15,25 +15,27 @@ class WeatherService:
 
         cached = self.cache.get_current(key)
         if cached is not None:
-            return cached
+            return CurrentWeatherMapper.to_response(cached)
 
         current = self.client.get_current_weather(location)
-        result = CurrentWeatherMapper.to_response(current)
+        self.cache.set_current(key, current)
 
-        self.cache.set_current(key, result)
-        return result
+        return CurrentWeatherMapper.to_response(current)
 
     def get_forecast(self, location: str) -> ForecastResponse:
         key = self.cache.make_key(location)
 
         cached = self.cache.get_forecast(key)
         if cached is not None:
-            return cached
+            return ForecastResponse(
+                city=cached.city,
+                days=ForecastMapper.build_days(cached.items),
+            )
 
         forecast = self.client.get_forecast(location)
-        days = ForecastMapper.build_days(forecast.items)
+        self.cache.set_forecast(key, forecast)
 
-        result = ForecastResponse(city=forecast.city, days=days)
-
-        self.cache.set_forecast(key, result)
-        return result
+        return ForecastResponse(
+            city=forecast.city,
+            days=ForecastMapper.build_days(forecast.items),
+        )
