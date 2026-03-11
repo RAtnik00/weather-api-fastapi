@@ -1,9 +1,18 @@
 import { useState } from "react";
-import { useCurrentWeather, useForecast } from "./services/useWeather";
-import Card from "./components/Card";
+import {
+    useAddFavorite,
+    useCurrentWeather,
+    useFavorites,
+    useForecast,
+    useHistory,
+    useRemoveFavorite,
+} from "./services/useWeather";
 import SearchBar from "./components/SearchBar";
 import CurrentWeatherCard from "./components/CurrentWeatherCard";
 import ForecastCard from "./components/ForecastCard";
+import HistoryCard from "./components/HistoryCard";
+import FavoritesCard from "./components/FavoritesCard";
+import QuickActionsCard from "./components/QuickActionsCard";
 import "./App.css";
 
 export default function App() {
@@ -12,11 +21,38 @@ export default function App() {
 
     const currentQ = useCurrentWeather(city);
     const forecastQ = useForecast(city);
+    const historyQ = useHistory();
+    const favoritesQ = useFavorites();
+
+    const addFavoriteM = useAddFavorite();
+    const removeFavoriteM = useRemoveFavorite();
 
     const handleSearch = () => {
         const nextCity = input.trim();
         if (!nextCity) return;
         setCity(nextCity);
+    };
+
+    const handleSelectCity = (nextCity) => {
+        setInput(nextCity);
+        setCity(nextCity);
+    };
+
+    const handleAddFavorite = (targetCity) => {
+        const nextCity = targetCity?.trim();
+        if (!nextCity) return;
+        addFavoriteM.mutate(nextCity);
+    };
+
+    const handleRemoveFavorite = (targetCity) => {
+        removeFavoriteM.mutate(targetCity);
+    };
+
+    const handleRefresh = () => {
+        currentQ.refetch();
+        forecastQ.refetch();
+        historyQ.refetch();
+        favoritesQ.refetch();
     };
 
     return (
@@ -39,36 +75,29 @@ export default function App() {
                     <section className="colLeft">
                         <CurrentWeatherCard currentQ={currentQ} />
 
-                        <Card title="Quick actions">
-                            <div className="btnRow">
-                                <button className="ghostBtn" type="button">
-                                    ★ Add to favorites
-                                </button>
-                                <button className="ghostBtn" type="button">
-                                    ⟳ Refresh
-                                </button>
-                            </div>
-                            <div className="muted" style={{ marginTop: 10 }}>
-                                (Let's connect favorites/history in the next step)
-                            </div>
-                        </Card>
+                        <QuickActionsCard
+                            city={city}
+                            onAddFavorite={handleAddFavorite}
+                            onRefresh={handleRefresh}
+                            isAddingFavorite={addFavoriteM.isPending}
+                        />
                     </section>
 
                     <section className="rightCol">
                         <ForecastCard forecastQ={forecastQ} />
 
                         <div className="rightBottom">
-                            <Card title="History">
-                                <div className="muted">
-                                    Here will be cookies from the cookie history.
-                                </div>
-                            </Card>
+                            <HistoryCard
+                                historyQ={historyQ}
+                                onSelectCity={handleSelectCity}
+                            />
 
-                            <Card title="Favorites">
-                                <div className="muted">
-                                    Here will be a list of favorites + delete/select buttons.
-                                </div>
-                            </Card>
+                            <FavoritesCard
+                                favoritesQ={favoritesQ}
+                                onSelectCity={handleSelectCity}
+                                onRemoveFavorite={handleRemoveFavorite}
+                                removingCity={removeFavoriteM.variables}
+                            />
                         </div>
                     </section>
                 </main>
