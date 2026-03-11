@@ -1,9 +1,14 @@
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from dotenv import load_dotenv
+class Settings(BaseSettings):
+    debug: bool = False
 
-load_dotenv()
+    openweather_base_url: str
+    openweather_api_key: str
 
-DEBUG = os.getenv("DEBUG", "false").strip().lower() in {"1", "true", "yes", "on"}
-OPENWEATHER_BASE_URL = os.getenv("OPENWEATHER_BASE_URL")
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
+
+settings = Settings()

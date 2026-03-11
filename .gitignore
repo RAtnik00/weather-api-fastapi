@@ -1,4 +1,26 @@
+*.pyc
+*.pyo
+*.pyd
+
+# env
 .env
-.idea
+
+# mac
+.DS_Store
+
+# IDE
+.idea/
+
+# Python
 __pycache__/
 *.pyc
+
+# Node
+node_modules/
+
+# build
+dist/
+
+# Vite
+.vite/
+weather-frontend/.vite/
