@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import httpx
@@ -10,16 +11,24 @@ from app.exceptions.weather import (
 )
 from app.models.weather import CurrentWeatherData, ForecastData, ForecastItemData
 
+logger = logging.getLogger(__name__)
+
 
 class OpenWeatherClient:
     def __init__(self, base_url: str, api_key: str):
-        self.base_url = base_url
         self.api_key = api_key
+        self.client = httpx.Client(
+            base_url=base_url,
+            timeout=10.0,
+        )
 
     def get_current_weather(self, location: str) -> CurrentWeatherData:
-        url = f"{self.base_url}/weather"
-        params = {"q": location, "appid": self.api_key, "units": "metric"}
-        raw = self._get(url, params)
+        logger.info("Fetching current weather for location='%s'", location)
+
+        raw = self._get(
+            "/weather",
+            params={"q": location, "appid": self.api_key, "units": "metric"},
+        )
 
         main = raw.get("main") or {}
         weather_arr = raw.get("weather") or []
@@ -44,9 +53,12 @@ class OpenWeatherClient:
         )
 
     def get_forecast(self, location: str) -> ForecastData:
-        url = f"{self.base_url}/forecast"
-        params = {"q": location, "appid": self.api_key, "units": "metric"}
-        raw = self._get(url, params)
+        logger.info("Fetching forecast for location='%s'", location)
+
+        raw = self._get(
+            "/forecast",
+            params={"q": location, "appid": self.api_key, "units": "metric"},
+        )
 
         city = (raw.get("city") or {}).get("name") or location
         raw_items = raw.get("list") or []
@@ -88,14 +100,15 @@ class OpenWeatherClient:
 
         return ForecastData(city=str(city), items=items)
 
-    def _get(self, url: str, params: dict) -> dict:
+    def _get(self, path: str, params: dict) -> dict:
         try:
-            response = httpx.get(url, params=params, timeout=10)
+            response = self.client.get(path, params=params)
             response.raise_for_status()
             return response.json()
 
         except httpx.HTTPStatusError as e:
             status = e.response.status_code
+            logger.warning("OpenWeather HTTP error status=%s path='%s'", status, path)
 
             if status == 404:
                 raise CityNotFoundError("City not found") from e
@@ -107,4 +120,5 @@ class OpenWeatherClient:
             raise WeatherUpstreamError(f"OpenWeather API error: {status}") from e
 
         except httpx.RequestError as e:
+            logger.exception("OpenWeather request failed path='%s'", path)
             raise WeatherUpstreamError("OpenWeather is unreachable") from e
