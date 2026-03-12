@@ -47,3 +47,37 @@ class WeatherService:
             city=forecast.city,
             days=ForecastMapper.build_days(forecast.items),
         )
+
+    def get_current_weather_by_coords(self, lat: float, lon: float) -> CurrentWeatherResponse:
+        key = self.cache.make_key(f"{lat:.4f},{lon:.4f}")
+
+        cached = self.cache.get_current(key)
+        if cached is not None:
+            logger.info("Current weather by coords cache hit for key='%s'", key)
+            return CurrentWeatherMapper.to_response(cached)
+
+        logger.info("Current weather by coords cache miss for key='%s'", key)
+        current = self.client.get_current_weather_by_coords(lat=lat, lon=lon)
+        self.cache.set_current(key, current)
+
+        return CurrentWeatherMapper.to_response(current)
+
+    def get_forecast_by_coords(self, lat: float, lon: float) -> ForecastResponse:
+        key = self.cache.make_key(f"{lat:.4f},{lon:.4f}")
+
+        cached = self.cache.get_forecast(key)
+        if cached is not None:
+            logger.info("Forecast by coords cache hit for key='%s'", key)
+            return ForecastResponse(
+                city=cached.city,
+                days=ForecastMapper.build_days(cached.items),
+            )
+
+        logger.info("Forecast by coords cache miss for key='%s'", key)
+        forecast = self.client.get_forecast_by_coords(lat=lat, lon=lon)
+        self.cache.set_forecast(key, forecast)
+
+        return ForecastResponse(
+            city=forecast.city,
+            days=ForecastMapper.build_days(forecast.items),
+        )
