@@ -24,7 +24,9 @@ export default function ForecastCard({ forecastQ }) {
                             <div className="ftDate">{d.date}</div>
                             <div>{Math.round(d.min_c)}°</div>
                             <div>{Math.round(d.max_c)}°</div>
-                            <div className="muted">—</div>
+                            <div className="muted">
+                                {d.wind_kph != null ? `${Math.round(d.wind_kph)} km/h` : "-"}
+                            </div>
                             <div className="muted">{d.condition}</div>
                         </div>
                     ))}
