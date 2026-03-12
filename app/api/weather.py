@@ -25,7 +25,7 @@ def current_weather(
     result = service.get_current_weather(location)
 
     history = cookies_service.get_history(request.cookies)
-    history = cookies_service.add_to_history(history, location)
+    history = cookies_service.add_to_history(history, result.city)
 
     response.set_cookie(
         key=cookies_service.HISTORY_KEY,
@@ -42,6 +42,38 @@ def forecast_weather(
     service: WeatherService = Depends(get_weather_service),
 ):
     return service.get_forecast(location)
+
+
+@router.get("/weather/current/by-coords", response_model=CurrentWeatherResponse)
+def current_weather_by_coords(
+    request: Request,
+    response: Response,
+    lat: float = Query(...),
+    lon: float = Query(...),
+    service: WeatherService = Depends(get_weather_service),
+    cookies_service: CookiesService = Depends(get_cookies_service),
+):
+    result = service.get_current_weather_by_coords(lat=lat, lon=lon)
+
+    history = cookies_service.get_history(request.cookies)
+    history = cookies_service.add_to_history(history, result.city)
+
+    response.set_cookie(
+        key=cookies_service.HISTORY_KEY,
+        value=cookies_service.encode_history(history),
+        httponly=True,
+        samesite="lax",
+    )
+    return result
+
+
+@router.get("/weather/forecast/by-coords", response_model=ForecastResponse)
+def forecast_weather_by_coords(
+    lat: float = Query(...),
+    lon: float = Query(...),
+    service: WeatherService = Depends(get_weather_service),
+):
+    return service.get_forecast_by_coords(lat=lat, lon=lon)
 
 
 @router.get("/history")
