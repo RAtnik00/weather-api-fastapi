@@ -1,18 +1,33 @@
 import json
+from urllib.parse import quote, unquote
+
 
 class CookiesService:
     HISTORY_KEY = "weather_history"
     FAVORITES_KEY = "weather_favorites"
 
-    def get_history(self, cookies: dict[str, str]) -> list[str]:
-        raw = cookies.get(self.HISTORY_KEY)
+    def _decode_cookie_list(self, raw: str | None) -> list[str]:
         if not raw:
             return []
+
         try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
+            decoded = unquote(raw)
+            data = json.loads(decoded)
+        except (json.JSONDecodeError, TypeError, ValueError):
             return []
-        return data if isinstance(data, list) else []
+
+        if not isinstance(data, list):
+            return []
+
+        return [str(item).strip() for item in data if str(item).strip()]
+
+    def _encode_cookie_list(self, values: list[str]) -> str:
+        normalized = [str(value).strip() for value in values if str(value).strip()]
+        return quote(json.dumps(normalized, ensure_ascii=False), safe="")
+
+    def get_history(self, cookies: dict[str, str]) -> list[str]:
+        raw = cookies.get(self.HISTORY_KEY)
+        return self._decode_cookie_list(raw)
 
     def add_to_history(self, history: list[str], location: str) -> list[str]:
         location = location.strip()
@@ -21,25 +36,20 @@ class CookiesService:
 
         seen = set()
         new_history: list[str] = []
+
         for item in [location] + history:
-            key = item.strip().lower()
+            normalized = item.strip()
+            key = normalized.lower()
             if not key or key in seen:
                 continue
             seen.add(key)
-            new_history.append(item.strip())
+            new_history.append(normalized)
+
         return new_history[:10]
 
     def get_favorites(self, cookies: dict[str, str]) -> list[str]:
         raw = cookies.get(self.FAVORITES_KEY)
-
-        if not raw:
-            return []
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
-            return []
-
-        return data if isinstance(data, list) else []
+        return self._decode_cookie_list(raw)
 
     def add_favorite(self, favorites: list[str], location: str) -> list[str]:
         location = location.strip()
@@ -50,11 +60,12 @@ class CookiesService:
         new_favorites: list[str] = []
 
         for item in [location] + favorites:
-            key = item.strip().lower()
+            normalized = item.strip()
+            key = normalized.lower()
             if not key or key in seen:
                 continue
             seen.add(key)
-            new_favorites.append(item.strip())
+            new_favorites.append(normalized)
 
         return new_favorites[:50]
 
@@ -63,7 +74,7 @@ class CookiesService:
         return [item for item in favorites if item.strip().lower() != location_key]
 
     def encode_history(self, history: list[str]) -> str:
-        return json.dumps(history, ensure_ascii=False)
+        return self._encode_cookie_list(history)
 
     def encode_favorites(self, favorites: list[str]) -> str:
-        return json.dumps(favorites, ensure_ascii=False)
+        return self._encode_cookie_list(favorites)
