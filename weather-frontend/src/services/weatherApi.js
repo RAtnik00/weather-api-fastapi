@@ -15,9 +15,41 @@ export async function fetchCurrentWeather(city) {
     };
 }
 
+export async function fetchCurrentWeatherByCoords(lat, lon) {
+    const { data } = await api.get("/weather/current/by-coords", {
+        params: { lat, lon },
+    });
+
+    return {
+        city: data.city,
+        temp_c: data.temp_c,
+        feelslike_c: data.feels_like_c,
+        condition: data.description,
+        wind_kph: data.wind_speed,
+        humidity: data.humidity ?? null,
+    };
+}
+
 export async function fetchForecast(city) {
     const { data } = await api.get("/weather/forecast", {
         params: { location: city },
+    });
+
+    return {
+        city: data.city,
+        days: (data.days || []).map((d) => ({
+            date: d.date,
+            min_c: d.temp_min_c,
+            max_c: d.temp_max_c,
+            wind_kph: d.wind_speed_avg,
+            condition: d.description,
+        })),
+    };
+}
+
+export async function fetchForecastByCoords(lat, lon) {
+    const { data } = await api.get("/weather/forecast/by-coords", {
+        params: { lat, lon },
     });
 
     return {

@@ -2,8 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     addFavorite,
     fetchCurrentWeather,
+    fetchCurrentWeatherByCoords,
     fetchFavorites,
     fetchForecast,
+    fetchForecastByCoords,
     fetchHistory,
     removeFavorite,
 } from "./weatherApi";
@@ -16,11 +18,27 @@ export function useCurrentWeather(city) {
     });
 }
 
+export function useCurrentWeatherByCoords(lat, lon) {
+    return useQuery({
+        queryKey: ["weather", "current", "coords", lat, lon],
+        queryFn: () => fetchCurrentWeatherByCoords(lat, lon),
+        enabled: Number.isFinite(lat) && Number.isFinite(lon),
+    });
+}
+
 export function useForecast(city) {
     return useQuery({
         queryKey: ["weather", "forecast", city],
         queryFn: () => fetchForecast(city),
         enabled: Boolean(city),
+    });
+}
+
+export function useForecastByCoords(lat, lon) {
+    return useQuery({
+        queryKey: ["weather", "forecast", "coords", lat, lon],
+        queryFn: () => fetchForecastByCoords(lat, lon),
+        enabled: Number.isFinite(lat) && Number.isFinite(lon),
     });
 }
 
