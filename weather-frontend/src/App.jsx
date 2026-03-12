@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     useAddFavorite,
     useCurrentWeather,
@@ -16,7 +16,7 @@ import QuickActionsCard from "./components/QuickActionsCard";
 import "./App.css";
 
 export default function App() {
-    const [input, setInput] = useState("Warsaw");
+    const [input, setInput] = useState();
     const [city, setCity] = useState("Warsaw");
 
     const currentQ = useCurrentWeather(city);
@@ -26,6 +26,17 @@ export default function App() {
 
     const addFavoriteM = useAddFavorite();
     const removeFavoriteM = useRemoveFavorite();
+
+    const lastHistorySyncCityRef = useRef(null);
+
+    useEffect(() => {
+        if (!currentQ.data?.city) return;
+
+        if (lastHistorySyncCityRef.current === currentQ.data.city) return;
+
+        lastHistorySyncCityRef.current = currentQ.data.city;
+        historyQ.refetch();
+    }, [currentQ.data, historyQ]);
 
     const handleSearch = () => {
         const nextCity = input.trim();

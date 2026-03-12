@@ -29,7 +29,7 @@ export default function CurrentWeatherCard({ currentQ }) {
                                 Wind:{" "}
                                 <b>
                                     {currentQ.data.wind_kph != null
-                                        ? `${Math.round(currentQ.data.wind_kph)}`
+                                        ? `${Math.round(currentQ.data.wind_kph)} km/h`
                                         : "—"}
                                 </b>
                             </div>

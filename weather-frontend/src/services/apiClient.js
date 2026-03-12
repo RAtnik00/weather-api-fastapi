@@ -10,6 +10,7 @@ function buildUrl(path, params) {
             }
         }
     }
+
     return url.toString();
 }
 
@@ -22,9 +23,10 @@ async function request(url, options = {}) {
             ...(options.headers || {}),
         },
     });
-    
+
     let data = null;
     const text = await res.text();
+
     try {
         data = text ? JSON.parse(text) : null;
     } catch {
@@ -46,10 +48,15 @@ const api = {
         const url = buildUrl(path, config.params);
         return request(url, { method: "GET" });
     },
+
     post(path, body, config = {}) {
         const url = buildUrl(path, config.params);
-        return request(url, { method: "POST", body: JSON.stringify(body ?? {}) });
+        return request(url, {
+            method: "POST",
+            body: JSON.stringify(body ?? {}),
+        });
     },
+
     delete(path, config = {}) {
         const url = buildUrl(path, config.params);
         return request(url, { method: "DELETE" });
