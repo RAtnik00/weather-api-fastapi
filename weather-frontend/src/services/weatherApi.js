@@ -1,38 +1,85 @@
 import api from "./apiClient";
 
-export async function fetchCurrent(city) {
-    const res = await api.get("/weather/current", { params: { location: city } });
-
-    console.log("RAW current res:", res);
-    console.log("RAW current res.data:", res.data);
-
-    const d = res.data;
+export async function fetchCurrentWeather(city) {
+    const { data } = await api.get("/weather/current", {
+        params: { location: city },
+    });
 
     return {
-        city: d.city,
-        temp_c: d.temp_c,
-        feelslike_c: d.feels_like_c,
-        condition: d.description,
-        wind_kph: d.wind_speed,
-        humidity: d.humidity ?? null,
+        city: data.city,
+        temp_c: data.temp_c,
+        feelslike_c: data.feels_like_c,
+        condition: data.description,
+        wind_kph: data.wind_speed,
+        humidity: data.humidity ?? null,
+    };
+}
+
+export async function fetchCurrentWeatherByCoords(lat, lon) {
+    const { data } = await api.get("/weather/current/by-coords", {
+        params: { lat, lon },
+    });
+
+    return {
+        city: data.city,
+        temp_c: data.temp_c,
+        feelslike_c: data.feels_like_c,
+        condition: data.description,
+        wind_kph: data.wind_speed,
+        humidity: data.humidity ?? null,
     };
 }
 
 export async function fetchForecast(city) {
-    const res = await api.get("/weather/forecast", { params: { location: city } });
-
-    console.log("RAW forecast res:", res);
-    console.log("RAW forecast res.data:", res.data);
-
-    const d = res.data;
+    const { data } = await api.get("/weather/forecast", {
+        params: { location: city },
+    });
 
     return {
-        city: d.city,
-        days: (d.days || []).map((day) => ({
-            date: day.date,
-            min_c: day.temp_min_c,
-            max_c: day.temp_max_c,
-            condition: day.description,
+        city: data.city,
+        days: (data.days || []).map((d) => ({
+            date: d.date,
+            min_c: d.temp_min_c,
+            max_c: d.temp_max_c,
+            wind_kph: d.wind_speed_avg,
+            condition: d.description,
         })),
     };
+}
+
+export async function fetchForecastByCoords(lat, lon) {
+    const { data } = await api.get("/weather/forecast/by-coords", {
+        params: { lat, lon },
+    });
+
+    return {
+        city: data.city,
+        days: (data.days || []).map((d) => ({
+            date: d.date,
+            min_c: d.temp_min_c,
+            max_c: d.temp_max_c,
+            wind_kph: d.wind_speed_avg,
+            condition: d.description,
+        })),
+    };
+}
+
+export async function fetchHistory() {
+    const { data } = await api.get("/history");
+    return data.history || [];
+}
+
+export async function fetchFavorites() {
+    const { data } = await api.get("/favorites");
+    return data.favorites || [];
+}
+
+export async function addFavorite(city) {
+    const { data } = await api.post(`/favorites/${encodeURIComponent(city)}`);
+    return data.favorites || [];
+}
+
+export async function removeFavorite(city) {
+    const { data } = await api.delete(`/favorites/${encodeURIComponent(city)}`);
+    return data.favorites || [];
 }

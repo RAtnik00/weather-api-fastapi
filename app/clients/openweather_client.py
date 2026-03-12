@@ -30,6 +30,39 @@ class OpenWeatherClient:
             params={"q": location, "appid": self.api_key, "units": "metric"},
         )
 
+        return self._map_current_weather(raw, fallback_city=location)
+
+    def get_forecast(self, location: str) -> ForecastData:
+        logger.info("Fetching forecast for location='%s'", location)
+
+        raw = self._get(
+            "/forecast",
+            params={"q": location, "appid": self.api_key, "units": "metric"},
+        )
+
+        return self._map_forecast(raw, fallback_city=location)
+
+    def get_current_weather_by_coords(self, lat: float, lon: float) -> CurrentWeatherData:
+        logger.info("Fetching current weather for lat='%s', lon='%s'", lat, lon)
+
+        raw = self._get(
+            "/weather",
+            params={"lat": lat, "lon": lon, "appid": self.api_key, "units": "metric"},
+        )
+
+        return self._map_current_weather(raw, fallback_city=f"{lat},{lon}")
+
+    def get_forecast_by_coords(self, lat: float, lon: float) -> ForecastData:
+        logger.info("Fetching forecast for lat='%s', lon='%s'", lat, lon)
+
+        raw = self._get(
+            "/forecast",
+            params={"lat": lat, "lon": lon, "appid": self.api_key, "units": "metric"},
+        )
+
+        return self._map_forecast(raw, fallback_city=f"{lat},{lon}")
+
+    def _map_current_weather(self, raw: dict, fallback_city: str) -> CurrentWeatherData:
         main = raw.get("main") or {}
         weather_arr = raw.get("weather") or []
         wind = raw.get("wind") or {}
@@ -44,7 +77,7 @@ class OpenWeatherClient:
             humidity = None
 
         return CurrentWeatherData(
-            city=str(raw.get("name") or location),
+            city=str(raw.get("name") or fallback_city),
             temp_c=float(main.get("temp") or 0.0),
             feels_like_c=float(main.get("feels_like") or 0.0),
             description=description,
@@ -52,15 +85,8 @@ class OpenWeatherClient:
             humidity=humidity,
         )
 
-    def get_forecast(self, location: str) -> ForecastData:
-        logger.info("Fetching forecast for location='%s'", location)
-
-        raw = self._get(
-            "/forecast",
-            params={"q": location, "appid": self.api_key, "units": "metric"},
-        )
-
-        city = (raw.get("city") or {}).get("name") or location
+    def _map_forecast(self, raw: dict, fallback_city: str) -> ForecastData:
+        city = (raw.get("city") or {}).get("name") or fallback_city
         raw_items = raw.get("list") or []
 
         items: list[ForecastItemData] = []
