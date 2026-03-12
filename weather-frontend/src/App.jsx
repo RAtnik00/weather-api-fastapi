@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     useAddFavorite,
     useCurrentWeather,
+    useCurrentWeatherByCoords,
     useFavorites,
     useForecast,
+    useForecastByCoords,
     useHistory,
     useRemoveFavorite,
 } from "./services/useWeather";
@@ -16,18 +18,71 @@ import QuickActionsCard from "./components/QuickActionsCard";
 import "./App.css";
 
 export default function App() {
-    const [input, setInput] = useState();
+    const [input, setInput] = useState("");
     const [city, setCity] = useState("Warsaw");
+    const [coords, setCoords] = useState(null);
+    const [useGeoWeather, setUseGeoWeather] = useState(false);
 
-    const currentQ = useCurrentWeather(city);
-    const forecastQ = useForecast(city);
+    const didTryGeolocationRef = useRef(false);
+    const lastHistorySyncCityRef = useRef(null);
+
+    const currentByCityQ = useCurrentWeather(city);
+    const forecastByCityQ = useForecast(city);
+
+    const currentByCoordsQ = useCurrentWeatherByCoords(
+        coords?.lat,
+        coords?.lon
+    );
+    const forecastByCoordsQ = useForecastByCoords(
+        coords?.lat,
+        coords?.lon
+    );
+
     const historyQ = useHistory();
     const favoritesQ = useFavorites();
 
     const addFavoriteM = useAddFavorite();
     const removeFavoriteM = useRemoveFavorite();
 
-    const lastHistorySyncCityRef = useRef(null);
+    useEffect(() => {
+        if (didTryGeolocationRef.current) return;
+        didTryGeolocationRef.current = true;
+
+        if (!("geolocation" in navigator)) return;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setCoords({
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
+                });
+                setUseGeoWeather(true);
+            },
+            (error) => {
+                console.warn("Geolocation denied or unavailable:", error);
+                setUseGeoWeather(false);
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 7000,
+                maximumAge: 300000,
+            }
+        );
+    }, []);
+
+    const currentQ = useMemo(() => {
+        if (useGeoWeather && coords) {
+            return currentByCoordsQ;
+        }
+        return currentByCityQ;
+    }, [useGeoWeather, coords, currentByCoordsQ, currentByCityQ]);
+
+    const forecastQ = useMemo(() => {
+        if (useGeoWeather && coords) {
+            return forecastByCoordsQ;
+        }
+        return forecastByCityQ;
+    }, [useGeoWeather, coords, forecastByCoordsQ, forecastByCityQ]);
 
     useEffect(() => {
         if (!currentQ.data?.city) return;
@@ -36,16 +91,19 @@ export default function App() {
 
         lastHistorySyncCityRef.current = currentQ.data.city;
         historyQ.refetch();
-    }, [currentQ.data, historyQ]);
+    }, [currentQ.data?.city, historyQ]);
 
     const handleSearch = () => {
         const nextCity = input.trim();
         if (!nextCity) return;
+
+        setUseGeoWeather(false);
         setCity(nextCity);
     };
 
     const handleSelectCity = (nextCity) => {
         setInput(nextCity);
+        setUseGeoWeather(false);
         setCity(nextCity);
     };
 
@@ -65,6 +123,8 @@ export default function App() {
         historyQ.refetch();
         favoritesQ.refetch();
     };
+
+    const activeCity = currentQ.data?.city || city;
 
     return (
         <div className="page">
@@ -87,7 +147,7 @@ export default function App() {
                         <CurrentWeatherCard currentQ={currentQ} />
 
                         <QuickActionsCard
-                            city={city}
+                            city={activeCity}
                             onAddFavorite={handleAddFavorite}
                             onRefresh={handleRefresh}
                             isAddingFavorite={addFavoriteM.isPending}
