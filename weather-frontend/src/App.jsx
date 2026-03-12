@@ -19,9 +19,35 @@ import "./App.css";
 
 export default function App() {
     const [input, setInput] = useState("");
-    const [city, setCity] = useState("Warsaw");
-    const [coords, setCoords] = useState(null);
-    const [useGeoWeather, setUseGeoWeather] = useState(false);
+    const [city, setCity] = useState("");
+    const [coords, setCoords] = useState(() => {
+        const raw = localStorage.getItem("weather_coords");
+        if (!raw) return null;
+
+        try {
+            const parsed = JSON.parse(raw);
+            if (
+                typeof parsed?.lat === "number" &&
+                typeof parsed?.lon === "number"
+            ) {
+                return parsed;
+            }
+        } catch {
+            return null;
+        }
+
+        return null;
+    });
+
+    const [useGeoWeather, setUseGeoWeather] = useState(() => {
+        const raw = localStorage.getItem("weather_coords");
+        return Boolean(raw);
+    });
+
+    const [geoResolved, setGeoResolved] = useState(() => {
+        const raw = localStorage.getItem("weather_coords");
+        return Boolean(raw);
+    });
 
     const didTryGeolocationRef = useRef(false);
     const lastHistorySyncCityRef = useRef(null);
@@ -48,27 +74,44 @@ export default function App() {
         if (didTryGeolocationRef.current) return;
         didTryGeolocationRef.current = true;
 
-        if (!("geolocation" in navigator)) return;
+        if (!("geolocation" in navigator)) {
+            if (!coords) {
+                setCity("Warsaw");
+                setUseGeoWeather(false);
+            }
+            setGeoResolved(true);
+            return;
+        }
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                setCoords({
+                const nextCoords = {
                     lat: position.coords.latitude,
                     lon: position.coords.longitude,
-                });
+                };
+
+                localStorage.setItem("weather_coords", JSON.stringify(nextCoords));
+                setCoords(nextCoords);
                 setUseGeoWeather(true);
+                setGeoResolved(true);
             },
             (error) => {
                 console.warn("Geolocation denied or unavailable:", error);
-                setUseGeoWeather(false);
+
+                if (!coords) {
+                    setCity("Warsaw");
+                    setUseGeoWeather(false);
+                }
+
+                setGeoResolved(true);
             },
             {
                 enableHighAccuracy: false,
-                timeout: 7000,
-                maximumAge: 300000,
+                timeout: 2500,
+                maximumAge: 900000,
             }
         );
-    }, []);
+    }, [coords]);
 
     const currentQ = useMemo(() => {
         if (useGeoWeather && coords) {
@@ -86,7 +129,6 @@ export default function App() {
 
     useEffect(() => {
         if (!currentQ.data?.city) return;
-
         if (lastHistorySyncCityRef.current === currentQ.data.city) return;
 
         lastHistorySyncCityRef.current = currentQ.data.city;
@@ -125,6 +167,43 @@ export default function App() {
     };
 
     const activeCity = currentQ.data?.city || city;
+
+    if (!geoResolved) {
+        return (
+            <div className="page">
+                <div className="shell">
+                    <header className="topbar">
+                        <div>
+                            <div className="h1">Weather</div>
+                            <div className="sub">Desktop dashboard</div>
+                        </div>
+
+                        <SearchBar
+                            input={input}
+                            setInput={setInput}
+                            onSearch={handleSearch}
+                        />
+                    </header>
+
+                    <main className="grid">
+                        <section className="colLeft">
+                            <div className="card">
+                                <div className="cardTitle">Current</div>
+                                <div className="muted">Detecting your location...</div>
+                            </div>
+                        </section>
+
+                        <section className="rightCol">
+                            <div className="card">
+                                <div className="cardTitle">Forecast</div>
+                                <div className="muted">Waiting for weather data...</div>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="page">
