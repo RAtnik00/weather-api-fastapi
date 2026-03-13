@@ -1,13 +1,25 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
+const STORAGE_KEYS = {
+    cookieConsent: "weather_geo_cache_consent",
+};
+
+const DEFAULT_CONSENT = "unset";
+
+function hasValue(value) {
+    return value !== undefined && value !== null && String(value).length > 0;
+}
+
 function buildUrl(path, params) {
     const url = new URL(path, BASE_URL || window.location.origin);
 
-    if (params && typeof params === "object") {
-        for (const [key, value] of Object.entries(params)) {
-            if (value !== undefined && value !== null && String(value).length > 0) {
-                url.searchParams.set(key, String(value));
-            }
+    if (!params || typeof params !== "object") {
+        return url.toString();
+    }
+
+    for (const [key, value] of Object.entries(params)) {
+        if (hasValue(value)) {
+            url.searchParams.set(key, String(value));
         }
     }
 
@@ -15,57 +27,86 @@ function buildUrl(path, params) {
 }
 
 function getCookieConsent() {
-    return localStorage.getItem("weather_geo_cache_consent") || "unset";
+    return localStorage.getItem(STORAGE_KEYS.cookieConsent) || DEFAULT_CONSENT;
+}
+
+function buildHeaders(customHeaders = {}) {
+    return {
+        "Content-Type": "application/json",
+        "X-Cookie-Consent": getCookieConsent(),
+        ...customHeaders,
+    };
+}
+
+async function parseResponseData(response) {
+    const text = await response.text();
+
+    if (!text) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+}
+
+function buildErrorMessage(response, data) {
+    return (
+        (data && (data.detail || data.message)) ||
+        `HTTP ${response.status} ${response.statusText}`
+    );
 }
 
 async function request(url, options = {}) {
-    const res = await fetch(url, {
+    const response = await fetch(url, {
         ...options,
         credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Cookie-Consent": getCookieConsent(),
-            ...(options.headers || {}),
-        },
+        headers: buildHeaders(options.headers),
     });
 
-    let data = null;
-    const text = await res.text();
+    const data = await parseResponseData(response);
 
-    try {
-        data = text ? JSON.parse(text) : null;
-    } catch {
-        data = text || null;
-    }
-
-    if (!res.ok) {
-        const message =
-            (data && (data.detail || data.message)) ||
-            `HTTP ${res.status} ${res.statusText}`;
-        throw new Error(message);
+    if (!response.ok) {
+        throw new Error(buildErrorMessage(response, data));
     }
 
     return { data };
 }
 
+function get(path, config = {}) {
+    const url = buildUrl(path, config.params);
+
+    return request(url, {
+        method: "GET",
+        headers: config.headers,
+    });
+}
+
+function post(path, body, config = {}) {
+    const url = buildUrl(path, config.params);
+
+    return request(url, {
+        method: "POST",
+        body: JSON.stringify(body ?? {}),
+        headers: config.headers,
+    });
+}
+
+function remove(path, config = {}) {
+    const url = buildUrl(path, config.params);
+
+    return request(url, {
+        method: "DELETE",
+        headers: config.headers,
+    });
+}
+
 const api = {
-    get(path, config = {}) {
-        const url = buildUrl(path, config.params);
-        return request(url, { method: "GET" });
-    },
-
-    post(path, body, config = {}) {
-        const url = buildUrl(path, config.params);
-        return request(url, {
-            method: "POST",
-            body: JSON.stringify(body ?? {}),
-        });
-    },
-
-    delete(path, config = {}) {
-        const url = buildUrl(path, config.params);
-        return request(url, { method: "DELETE" });
-    },
+    get,
+    post,
+    delete: remove,
 };
 
 export default api;
