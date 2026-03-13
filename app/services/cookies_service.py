@@ -1,10 +1,13 @@
 import json
 from urllib.parse import quote, unquote
 
+from fastapi import Request, Response
+
 
 class CookiesService:
     HISTORY_KEY = "weather_history"
     FAVORITES_KEY = "weather_favorites"
+    CONSENT_HEADER = "x-cookie-consent"
 
     def _decode_cookie_list(self, raw: str | None) -> list[str]:
         if not raw:
@@ -24,6 +27,14 @@ class CookiesService:
     def _encode_cookie_list(self, values: list[str]) -> str:
         normalized = [str(value).strip() for value in values if str(value).strip()]
         return quote(json.dumps(normalized, ensure_ascii=False), safe="")
+
+    def has_cookie_consent(self, request: Request) -> bool:
+        consent = request.headers.get(self.CONSENT_HEADER, "unset").strip().lower()
+        return consent == "accepted"
+
+    def clear_weather_cookies(self, response: Response) -> None:
+        response.delete_cookie(key=self.HISTORY_KEY, httponly=True, samesite="lax")
+        response.delete_cookie(key=self.FAVORITES_KEY, httponly=True, samesite="lax")
 
     def get_history(self, cookies: dict[str, str]) -> list[str]:
         raw = cookies.get(self.HISTORY_KEY)

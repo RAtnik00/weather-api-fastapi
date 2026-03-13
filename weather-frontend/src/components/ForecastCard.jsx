@@ -1,5 +1,19 @@
 import Card from "./Card";
 
+function formatForecastDate(dateString) {
+    const date = new Date(dateString);
+    const today = new Date();
+
+    const isToday =
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear();
+
+    if (isToday) return "Today";
+
+    return date.toLocaleDateString("en-US", { weekday: "long" });
+}
+
 export default function ForecastCard({ forecastQ }) {
     return (
         <Card title="5-day forecast">
@@ -21,7 +35,7 @@ export default function ForecastCard({ forecastQ }) {
 
                     {forecastQ.data.days.map((d) => (
                         <div className="ftRow" key={d.date}>
-                            <div className="ftDate">{d.date}</div>
+                            <div className="ftDate">{formatForecastDate(d.date)}</div>
                             <div>{Math.round(d.min_c)}°</div>
                             <div>{Math.round(d.max_c)}°</div>
                             <div className="muted">
