@@ -24,15 +24,19 @@ def current_weather(
 ):
     result = service.get_current_weather(location)
 
-    history = cookies_service.get_history(request.cookies)
-    history = cookies_service.add_to_history(history, result.city)
+    if cookies_service.has_cookie_consent(request):
+        history = cookies_service.get_history(request.cookies)
+        history = cookies_service.add_to_history(history, result.city)
 
-    response.set_cookie(
-        key=cookies_service.HISTORY_KEY,
-        value=cookies_service.encode_history(history),
-        httponly=True,
-        samesite="lax",
-    )
+        response.set_cookie(
+            key=cookies_service.HISTORY_KEY,
+            value=cookies_service.encode_history(history),
+            httponly=True,
+            samesite="lax",
+        )
+    else:
+        cookies_service.clear_weather_cookies(response)
+
     return result
 
 
@@ -55,15 +59,19 @@ def current_weather_by_coords(
 ):
     result = service.get_current_weather_by_coords(lat=lat, lon=lon)
 
-    history = cookies_service.get_history(request.cookies)
-    history = cookies_service.add_to_history(history, result.city)
+    if cookies_service.has_cookie_consent(request):
+        history = cookies_service.get_history(request.cookies)
+        history = cookies_service.add_to_history(history, result.city)
 
-    response.set_cookie(
-        key=cookies_service.HISTORY_KEY,
-        value=cookies_service.encode_history(history),
-        httponly=True,
-        samesite="lax",
-    )
+        response.set_cookie(
+            key=cookies_service.HISTORY_KEY,
+            value=cookies_service.encode_history(history),
+            httponly=True,
+            samesite="lax",
+        )
+    else:
+        cookies_service.clear_weather_cookies(response)
+
     return result
 
 
@@ -79,8 +87,13 @@ def forecast_weather_by_coords(
 @router.get("/history")
 def get_history(
     request: Request,
+    response: Response,
     cookies_service: CookiesService = Depends(get_cookies_service),
 ):
+    if not cookies_service.has_cookie_consent(request):
+        cookies_service.clear_weather_cookies(response)
+        return {"history": []}
+
     history = cookies_service.get_history(request.cookies)
     return {"history": history}
 
@@ -88,8 +101,13 @@ def get_history(
 @router.get("/favorites")
 def get_favorites(
     request: Request,
+    response: Response,
     cookies_service: CookiesService = Depends(get_cookies_service),
 ):
+    if not cookies_service.has_cookie_consent(request):
+        cookies_service.clear_weather_cookies(response)
+        return {"favorites": []}
+
     favorites = cookies_service.get_favorites(request.cookies)
     return {"favorites": favorites}
 
@@ -101,6 +119,10 @@ def add_favorite(
     response: Response,
     cookies_service: CookiesService = Depends(get_cookies_service),
 ):
+    if not cookies_service.has_cookie_consent(request):
+        cookies_service.clear_weather_cookies(response)
+        return {"favorites": []}
+
     favorites = cookies_service.get_favorites(request.cookies)
     favorites = cookies_service.add_favorite(favorites, location)
 
@@ -120,6 +142,10 @@ def remove_favorite(
     response: Response,
     cookies_service: CookiesService = Depends(get_cookies_service),
 ):
+    if not cookies_service.has_cookie_consent(request):
+        cookies_service.clear_weather_cookies(response)
+        return {"favorites": []}
+
     favorites = cookies_service.get_favorites(request.cookies)
     favorites = cookies_service.remove_favorite(favorites, location)
 
