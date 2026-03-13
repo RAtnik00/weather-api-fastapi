@@ -14,12 +14,17 @@ function buildUrl(path, params) {
     return url.toString();
 }
 
+function getCookieConsent() {
+    return localStorage.getItem("weather_geo_cache_consent") || "unset";
+}
+
 async function request(url, options = {}) {
     const res = await fetch(url, {
         ...options,
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
+            "X-Cookie-Consent": getCookieConsent(),
             ...(options.headers || {}),
         },
     });
