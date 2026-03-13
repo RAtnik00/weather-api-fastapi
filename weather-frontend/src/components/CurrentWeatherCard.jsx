@@ -1,57 +1,71 @@
 import Card from "./Card";
 
+function formatTemperature(value) {
+    return value != null ? `${Math.round(value)}°` : "—";
+}
+
+function formatWind(value) {
+    return value != null ? `${Math.round(value)} km/h` : "—";
+}
+
+function formatHumidity(value) {
+    return value != null ? `${Math.round(value)}%` : "—";
+}
+
 export default function CurrentWeatherCard({ currentQ }) {
-    return (
-        <Card title="Current">
-            {currentQ.isLoading ? (
+    const weather = currentQ.data;
+
+    if (currentQ.isLoading) {
+        return (
+            <Card title="Current">
                 <div className="muted">Loading…</div>
-            ) : currentQ.isError ? (
+            </Card>
+        );
+    }
+
+    if (currentQ.isError) {
+        return (
+            <Card title="Current">
                 <div className="error">
                     Error: {String(currentQ.error?.message || currentQ.error)}
                 </div>
-            ) : currentQ.data ? (
-                <>
-                    <div className="city">{currentQ.data.city}</div>
-                    <div className="desc">{currentQ.data.condition}</div>
+            </Card>
+        );
+    }
 
-                    <div className="tempRow">
-                        <div className="temp">{Math.round(currentQ.data.temp_c)}°</div>
-                        <div className="meta">
-                            <div>
-                                Feels like:{" "}
-                                <b>
-                                    {currentQ.data.feelslike_c != null
-                                        ? `${Math.round(currentQ.data.feelslike_c)}°`
-                                        : "—"}
-                                </b>
-                            </div>
-                            <div>
-                                Wind:{" "}
-                                <b>
-                                    {currentQ.data.wind_kph != null
-                                        ? `${Math.round(currentQ.data.wind_kph)} km/h`
-                                        : "—"}
-                                </b>
-                            </div>
-                        </div>
-                    </div>
+    if (!weather) {
+        return <Card title="Current" />;
+    }
 
-                    <div className="stats">
-                        <div className="stat">
-                            <div className="statLabel">Humidity</div>
-                            <div className="statValue">
-                                {currentQ.data.humidity != null
-                                    ? `${Math.round(currentQ.data.humidity)}%`
-                                    : "—"}
-                            </div>
-                        </div>
-                        <div className="stat">
-                            <div className="statLabel">Condition</div>
-                            <div className="statValue">{currentQ.data.condition}</div>
-                        </div>
+    return (
+        <Card title="Current">
+            <div className="city">{weather.city}</div>
+            <div className="desc">{weather.condition}</div>
+
+            <div className="tempRow">
+                <div className="temp">{formatTemperature(weather.temp_c)}</div>
+
+                <div className="meta">
+                    <div>
+                        Feels like: <b>{formatTemperature(weather.feelslike_c)}</b>
                     </div>
-                </>
-            ) : null}
+                    <div>
+                        Wind: <b>{formatWind(weather.wind_kph)}</b>
+                    </div>
+                </div>
+            </div>
+
+            <div className="stats">
+                <div className="stat">
+                    <div className="statLabel">Humidity</div>
+                    <div className="statValue">{formatHumidity(weather.humidity)}</div>
+                </div>
+
+                <div className="stat">
+                    <div className="statLabel">Condition</div>
+                    <div className="statValue">{weather.condition}</div>
+                </div>
+            </div>
         </Card>
     );
 }
