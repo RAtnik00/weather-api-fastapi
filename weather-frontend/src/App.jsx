@@ -20,7 +20,17 @@ import "./App.css";
 export default function App() {
     const [input, setInput] = useState("");
     const [city, setCity] = useState("");
+
+    const [geoCacheConsent, setGeoCacheConsent] = useState(() => {
+        return localStorage.getItem("weather_geo_cache_consent") || "unset";
+    });
+
+    const [pendingCoords, setPendingCoords] = useState(null);
+
     const [coords, setCoords] = useState(() => {
+        const consent = localStorage.getItem("weather_geo_cache_consent");
+        if (consent !== "accepted") return null;
+
         const raw = localStorage.getItem("weather_coords");
         if (!raw) return null;
 
@@ -40,13 +50,17 @@ export default function App() {
     });
 
     const [useGeoWeather, setUseGeoWeather] = useState(() => {
-        const raw = localStorage.getItem("weather_coords");
-        return Boolean(raw);
+        const consent = localStorage.getItem("weather_geo_cache_consent");
+        if (consent !== "accepted") return false;
+
+        return Boolean(localStorage.getItem("weather_coords"));
     });
 
     const [geoResolved, setGeoResolved] = useState(() => {
-        const raw = localStorage.getItem("weather_coords");
-        return Boolean(raw);
+        const consent = localStorage.getItem("weather_geo_cache_consent");
+        if (consent !== "accepted") return false;
+
+        return Boolean(localStorage.getItem("weather_coords"));
     });
 
     const didTryGeolocationRef = useRef(false);
@@ -90,9 +104,17 @@ export default function App() {
                     lon: position.coords.longitude,
                 };
 
-                localStorage.setItem("weather_coords", JSON.stringify(nextCoords));
-                setCoords(nextCoords);
-                setUseGeoWeather(true);
+                setPendingCoords(nextCoords);
+
+                if (geoCacheConsent === "accepted") {
+                    localStorage.setItem("weather_coords", JSON.stringify(nextCoords));
+                    setCoords(nextCoords);
+                    setUseGeoWeather(true);
+                } else {
+                    setCoords(nextCoords);
+                    setUseGeoWeather(true);
+                }
+
                 setGeoResolved(true);
             },
             (error) => {
@@ -111,7 +133,7 @@ export default function App() {
                 maximumAge: 900000,
             }
         );
-    }, [coords]);
+    }, [coords, geoCacheConsent]);
 
     const currentQ = useMemo(() => {
         if (useGeoWeather && coords) {
@@ -166,7 +188,36 @@ export default function App() {
         favoritesQ.refetch();
     };
 
+    const handleAcceptGeoCache = () => {
+        setGeoCacheConsent("accepted");
+        localStorage.setItem("weather_geo_cache_consent", "accepted");
+
+        if (pendingCoords) {
+            localStorage.setItem("weather_coords", JSON.stringify(pendingCoords));
+            setCoords(pendingCoords);
+        }
+
+        historyQ.refetch();
+        favoritesQ.refetch();
+    };
+
+
+    const handleDeclineGeoCache = () => {
+        setGeoCacheConsent("declined");
+        localStorage.setItem("weather_geo_cache_consent", "declined");
+        localStorage.removeItem("weather_coords");
+        setCoords(null);
+        setPendingCoords(null);
+        setUseGeoWeather(false);
+
+        historyQ.refetch();
+        favoritesQ.refetch();
+    };
+
+
     const activeCity = currentQ.data?.city || city;
+    const mustAnswerConsent =
+        geoResolved && pendingCoords && geoCacheConsent === "unset";
 
     if (!geoResolved) {
         return (
@@ -207,6 +258,26 @@ export default function App() {
 
     return (
         <div className="page">
+            {mustAnswerConsent && (
+                <div className="consentOverlay">
+                    <div className="consentModal">
+                        <div className="consentTitle">Save location data?</div>
+                        <div className="consentText">
+                            We can save your location on this device to load weather faster next time.
+                            You need to choose whether to allow this before using the site.
+                        </div>
+                        <div className="consentActions">
+                            <button type="button" onClick={handleAcceptGeoCache}>
+                                Yes, allow
+                            </button>
+                            <button type="button" onClick={handleDeclineGeoCache}>
+                                No, do not allow
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="shell">
                 <header className="topbar">
                     <div>
