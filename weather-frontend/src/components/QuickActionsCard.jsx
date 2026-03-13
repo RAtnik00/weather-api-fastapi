@@ -6,19 +6,30 @@ export default function QuickActionsCard({
                                              onRefresh,
                                              isAddingFavorite,
                                          }) {
+    const cannotAddFavorite = !city || isAddingFavorite;
+
+    function handleAddFavorite() {
+        if (!city) return;
+        onAddFavorite(city);
+    }
+
     return (
         <Card title="Quick actions">
             <div className="btnRow">
                 <button
                     className="ghostBtn"
                     type="button"
-                    onClick={() => onAddFavorite(city)}
-                    disabled={!city || isAddingFavorite}
+                    onClick={handleAddFavorite}
+                    disabled={cannotAddFavorite}
                 >
                     {isAddingFavorite ? "Adding..." : "★ Add to favorites"}
                 </button>
 
-                <button className="ghostBtn" type="button" onClick={onRefresh}>
+                <button
+                    className="ghostBtn"
+                    type="button"
+                    onClick={onRefresh}
+                >
                     ⟳ Refresh
                 </button>
             </div>
