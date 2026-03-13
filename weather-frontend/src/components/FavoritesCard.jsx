@@ -6,17 +6,45 @@ export default function FavoritesCard({
                                           onRemoveFavorite,
                                           removingCity,
                                       }) {
-    return (
-        <Card title="Favorites">
-            {favoritesQ.isLoading ? (
+    const favorites = favoritesQ.data ?? [];
+
+    function isRemoving(city) {
+        return removingCity === city;
+    }
+
+    if (favoritesQ.isLoading) {
+        return (
+            <Card title="Favorites">
                 <div className="muted">Loading…</div>
-            ) : favoritesQ.isError ? (
+            </Card>
+        );
+    }
+
+    if (favoritesQ.isError) {
+        return (
+            <Card title="Favorites">
                 <div className="error">
                     Error: {String(favoritesQ.error?.message || favoritesQ.error)}
                 </div>
-            ) : favoritesQ.data?.length ? (
-                <div className="listCol">
-                    {favoritesQ.data.map((city) => (
+            </Card>
+        );
+    }
+
+    if (!favorites.length) {
+        return (
+            <Card title="Favorites">
+                <div className="muted">No favorites yet</div>
+            </Card>
+        );
+    }
+
+    return (
+        <Card title="Favorites">
+            <div className="listCol">
+                {favorites.map((city) => {
+                    const removing = isRemoving(city);
+
+                    return (
                         <div className="favoriteRow" key={city}>
                             <button
                                 type="button"
@@ -30,16 +58,14 @@ export default function FavoritesCard({
                                 type="button"
                                 className="dangerBtn"
                                 onClick={() => onRemoveFavorite(city)}
-                                disabled={removingCity === city}
+                                disabled={removing}
                             >
-                                {removingCity === city ? "Removing..." : "Delete"}
+                                {removing ? "Removing..." : "Delete"}
                             </button>
                         </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="muted">No favorites yet</div>
-            )}
+                    );
+                })}
+            </div>
         </Card>
     );
 }
