@@ -1,16 +1,9 @@
 import Card from "./Card";
-
-function formatTemperature(value) {
-    return value != null ? `${Math.round(value)}°` : "—";
-}
-
-function formatWind(value) {
-    return value != null ? `${Math.round(value)} km/h` : "—";
-}
-
-function formatHumidity(value) {
-    return value != null ? `${Math.round(value)}%` : "—";
-}
+import {
+    formatTemperature,
+    formatWind,
+    formatHumidity,
+} from "../utils/weatherFormatters";
 
 export default function CurrentWeatherCard({ currentQ }) {
     const weather = currentQ.data;
