@@ -7,11 +7,11 @@ import {
 } from "./services/useWeather";
 import { useGeoWeather } from "./hooks/useGeoWeather";
 import SearchBar from "./components/SearchBar";
-import CurrentWeatherCard from "./components/CurrentWeatherCard";
-import ForecastCard from "./components/ForecastCard";
-import HistoryCard from "./components/HistoryCard";
-import FavoritesCard from "./components/FavoritesCard";
-import QuickActionsCard from "./components/QuickActionsCard";
+import CurrentWeatherCard from "./features/weather/components/CurrentWeatherCard";
+import ForecastCard from "./features/weather/components/ForecastCard";
+import HistoryCard from "./features/weather/components/HistoryCard";
+import FavoritesCard from "./features/weather/components/FavoritesCard";
+import QuickActionsCard from "./features/weather/components/QuickActionsCard";
 import "./App.css";
 
 function renderInitialLayout({ input, setInput, onSearch, leftText, rightText }) {
