@@ -9,7 +9,12 @@ from app.exceptions.weather import (
     WeatherRateLimitError,
     WeatherUpstreamError,
 )
-from app.models.weather import CurrentWeatherData, ForecastData, ForecastItemData
+from app.models.weather import (
+    CitySuggestionData,
+    CurrentWeatherData,
+    ForecastData,
+    ForecastItemData
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +26,7 @@ class OpenWeatherClient:
             base_url=base_url,
             timeout=10.0,
         )
+        self.geo_base_url = "https://api.openweathermap.org/geo/1.0"
 
     def get_current_weather(self, location: str) -> CurrentWeatherData:
         logger.info("Fetching current weather for location='%s'", location)
@@ -126,7 +132,7 @@ class OpenWeatherClient:
 
         return ForecastData(city=str(city), items=items)
 
-    def _get(self, path: str, params: dict) -> dict:
+    def _get(self, path: str, params: dict) -> dict | list:
         try:
             response = self.client.get(path, params=params)
             response.raise_for_status()
@@ -148,3 +154,74 @@ class OpenWeatherClient:
         except httpx.RequestError as e:
             logger.exception("OpenWeather request failed path='%s'", path)
             raise WeatherUpstreamError("OpenWeather is unreachable") from e
+
+    def _get_geo(self, path: str, params: dict) -> dict | list:
+        url = f"{self.geo_base_url}{path}"
+
+        try:
+            response = httpx.get(url, params=params, timeout=10.0)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPStatusError as e:
+            status = e.response.status_code
+            logger.warning("OpenWeather GEO HTTP error status=%s path='%s'", status, path)
+
+            if status == 404:
+                raise CityNotFoundError("City not found") from e
+            if status == 401:
+                raise WeatherAuthError("Invalid OpenWeather API key") from e
+            if status == 429:
+                raise WeatherRateLimitError("OpenWeather rate limit exceeded") from e
+
+            raise WeatherUpstreamError(f"OpenWeather API error: {status}") from e
+
+        except httpx.RequestError as e:
+            logger.exception("OpenWeather GEO request failed path='%s'", path)
+            raise WeatherUpstreamError("OpenWeather geocoding is unreachable") from e
+
+    def search_cities(self, query: str, limit: int = 5) -> list[CitySuggestionData]:
+        logger.info("Searching city suggestions for query='%s', limit=%s", query, limit)
+
+        raw = self._get_geo(
+            "/direct",
+            params={
+                "q": query,
+                "limit": limit,
+                "appid": self.api_key,
+            },
+        )
+
+        if not isinstance(raw, list):
+            return []
+
+        suggestions: list[CitySuggestionData] = []
+
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+
+            name = str(item.get("name") or "").strip()
+            country = str(item.get("country") or "").strip()
+            state_raw = item.get("state")
+            lat_raw = item.get("lat")
+            lon_raw = item.get("lon")
+
+            if not name or not country:
+                continue
+
+            state = str(state_raw).strip() if isinstance(state_raw, str) and state_raw.strip() else None
+            lat = float(lat_raw) if isinstance(lat_raw, (int, float)) else None
+            lon = float(lon_raw) if isinstance(lon_raw, (int, float)) else None
+
+            suggestions.append(
+                CitySuggestionData(
+                    name=name,
+                    country=country,
+                    state=state,
+                    lat=lat,
+                    lon=lon,
+                )
+            )
+
+        return suggestions
