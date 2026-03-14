@@ -9,15 +9,7 @@ import {
     fetchHistory,
     removeFavorite,
 } from "./weatherApi";
-
-const weatherQueryKeys = {
-    currentByCity: (city) => ["weather", "current", city],
-    currentByCoords: (lat, lon) => ["weather", "current", "coords", lat, lon],
-    forecastByCity: (city) => ["weather", "forecast", city],
-    forecastByCoords: (lat, lon) => ["weather", "forecast", "coords", lat, lon],
-    history: () => ["weather", "history"],
-    favorites: () => ["weather", "favorites"],
-};
+import { WEATHER_QUERY_KEYS } from "../constants/weather";
 
 function hasValidCoords(lat, lon) {
     return Number.isFinite(lat) && Number.isFinite(lon);
@@ -46,7 +38,7 @@ function useFavoritesMutation(mutationFn) {
         mutationFn,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: weatherQueryKeys.favorites(),
+                queryKey: WEATHER_QUERY_KEYS.favorites(),
             });
         },
     });
@@ -55,7 +47,7 @@ function useFavoritesMutation(mutationFn) {
 export function useCurrentWeather(city) {
     return useQuery(
         createCityWeatherQuery({
-            queryKey: weatherQueryKeys.currentByCity,
+            queryKey: WEATHER_QUERY_KEYS.currentByCity,
             queryFn: fetchCurrentWeather,
             city,
         })
@@ -65,7 +57,7 @@ export function useCurrentWeather(city) {
 export function useCurrentWeatherByCoords(lat, lon) {
     return useQuery(
         createCoordsWeatherQuery({
-            queryKey: weatherQueryKeys.currentByCoords,
+            queryKey: WEATHER_QUERY_KEYS.currentByCoords,
             queryFn: fetchCurrentWeatherByCoords,
             lat,
             lon,
@@ -76,7 +68,7 @@ export function useCurrentWeatherByCoords(lat, lon) {
 export function useForecast(city) {
     return useQuery(
         createCityWeatherQuery({
-            queryKey: weatherQueryKeys.forecastByCity,
+            queryKey: WEATHER_QUERY_KEYS.forecastByCity,
             queryFn: fetchForecast,
             city,
         })
@@ -86,7 +78,7 @@ export function useForecast(city) {
 export function useForecastByCoords(lat, lon) {
     return useQuery(
         createCoordsWeatherQuery({
-            queryKey: weatherQueryKeys.forecastByCoords,
+            queryKey: WEATHER_QUERY_KEYS.forecastByCoords,
             queryFn: fetchForecastByCoords,
             lat,
             lon,
@@ -96,14 +88,14 @@ export function useForecastByCoords(lat, lon) {
 
 export function useHistory() {
     return useQuery({
-        queryKey: weatherQueryKeys.history(),
+        queryKey: WEATHER_QUERY_KEYS.history(),
         queryFn: fetchHistory,
     });
 }
 
 export function useFavorites() {
     return useQuery({
-        queryKey: weatherQueryKeys.favorites(),
+        queryKey: WEATHER_QUERY_KEYS.favorites(),
         queryFn: fetchFavorites,
     });
 }
