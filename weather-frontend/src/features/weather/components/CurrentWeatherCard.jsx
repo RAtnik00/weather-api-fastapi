@@ -1,9 +1,9 @@
-import Card from "./Card";
+import Card from "../../../components/Card.jsx";
 import {
     formatTemperature,
     formatWind,
     formatHumidity,
-} from "../utils/weatherFormatters";
+} from "../../../utils/weatherFormatters.js";
 
 export default function CurrentWeatherCard({ currentQ }) {
     const weather = currentQ.data;

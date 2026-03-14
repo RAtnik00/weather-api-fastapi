@@ -1,9 +1,9 @@
-import Card from "./Card";
+import Card from "../../../components/Card.jsx";
 import {
     formatForecastDate,
     formatTemperature,
     formatWind,
-} from "../utils/weatherFormatters";
+} from "../../../utils/weatherFormatters.js";
 
 export default function ForecastCard({ forecastQ }) {
     const forecast = forecastQ.data;

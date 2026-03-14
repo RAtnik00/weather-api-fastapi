@@ -9,71 +9,101 @@ import {
     fetchHistory,
     removeFavorite,
 } from "./weatherApi";
+import { WEATHER_QUERY_KEYS } from "../constants/weather";
+
+function hasValidCoords(lat, lon) {
+    return Number.isFinite(lat) && Number.isFinite(lon);
+}
+
+function createCityWeatherQuery({ queryKey, queryFn, city }) {
+    return {
+        queryKey: queryKey(city),
+        queryFn: () => queryFn(city),
+        enabled: Boolean(city),
+    };
+}
+
+function createCoordsWeatherQuery({ queryKey, queryFn, lat, lon }) {
+    return {
+        queryKey: queryKey(lat, lon),
+        queryFn: () => queryFn(lat, lon),
+        enabled: hasValidCoords(lat, lon),
+    };
+}
+
+function useFavoritesMutation(mutationFn) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: WEATHER_QUERY_KEYS.favorites(),
+            });
+        },
+    });
+}
 
 export function useCurrentWeather(city) {
-    return useQuery({
-        queryKey: ["weather", "current", city],
-        queryFn: () => fetchCurrentWeather(city),
-        enabled: Boolean(city),
-    });
+    return useQuery(
+        createCityWeatherQuery({
+            queryKey: WEATHER_QUERY_KEYS.currentByCity,
+            queryFn: fetchCurrentWeather,
+            city,
+        })
+    );
 }
 
 export function useCurrentWeatherByCoords(lat, lon) {
-    return useQuery({
-        queryKey: ["weather", "current", "coords", lat, lon],
-        queryFn: () => fetchCurrentWeatherByCoords(lat, lon),
-        enabled: Number.isFinite(lat) && Number.isFinite(lon),
-    });
+    return useQuery(
+        createCoordsWeatherQuery({
+            queryKey: WEATHER_QUERY_KEYS.currentByCoords,
+            queryFn: fetchCurrentWeatherByCoords,
+            lat,
+            lon,
+        })
+    );
 }
 
 export function useForecast(city) {
-    return useQuery({
-        queryKey: ["weather", "forecast", city],
-        queryFn: () => fetchForecast(city),
-        enabled: Boolean(city),
-    });
+    return useQuery(
+        createCityWeatherQuery({
+            queryKey: WEATHER_QUERY_KEYS.forecastByCity,
+            queryFn: fetchForecast,
+            city,
+        })
+    );
 }
 
 export function useForecastByCoords(lat, lon) {
-    return useQuery({
-        queryKey: ["weather", "forecast", "coords", lat, lon],
-        queryFn: () => fetchForecastByCoords(lat, lon),
-        enabled: Number.isFinite(lat) && Number.isFinite(lon),
-    });
+    return useQuery(
+        createCoordsWeatherQuery({
+            queryKey: WEATHER_QUERY_KEYS.forecastByCoords,
+            queryFn: fetchForecastByCoords,
+            lat,
+            lon,
+        })
+    );
 }
 
 export function useHistory() {
     return useQuery({
-        queryKey: ["weather", "history"],
+        queryKey: WEATHER_QUERY_KEYS.history(),
         queryFn: fetchHistory,
     });
 }
 
 export function useFavorites() {
     return useQuery({
-        queryKey: ["weather", "favorites"],
+        queryKey: WEATHER_QUERY_KEYS.favorites(),
         queryFn: fetchFavorites,
     });
 }
 
 export function useAddFavorite() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: addFavorite,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["weather", "favorites"] });
-        },
-    });
+    return useFavoritesMutation(addFavorite);
 }
 
 export function useRemoveFavorite() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: removeFavorite,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["weather", "favorites"] });
-        },
-    });
+    return useFavoritesMutation(removeFavorite);
 }
