@@ -1,7 +1,8 @@
 fastapi
-uvicorn
+uvicorn[standard]
 httpx
 python-dotenv
 pydantic
-pytest
+pydantic-settings
 cachetools
+pytest
