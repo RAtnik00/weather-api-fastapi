@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     addFavorite,
+    fetchCitySuggestions,
     fetchCurrentWeather,
     fetchCurrentWeatherByCoords,
     fetchFavorites,
@@ -106,4 +107,15 @@ export function useAddFavorite() {
 
 export function useRemoveFavorite() {
     return useFavoritesMutation(removeFavorite);
+}
+
+export function useCitySuggestions(query) {
+    const normalizedQuery = query.trim();
+
+    return useQuery({
+        queryKey: WEATHER_QUERY_KEYS.citySuggestions(normalizedQuery),
+        queryFn: () => fetchCitySuggestions(normalizedQuery),
+        enabled: normalizedQuery.length >= 2,
+        staleTime: 5 * 60 * 1000,
+    });
 }

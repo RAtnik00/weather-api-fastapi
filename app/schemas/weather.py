@@ -23,3 +23,10 @@ class ForecastDay(BaseModel):
 class ForecastResponse(BaseModel):
     city: str
     days: list[ForecastDay]
+
+class CitySuggestionResponse(BaseModel):
+    name: str
+    country: str
+    state: str | None = None
+    lat: float | None = None
+    lon: float | None = None

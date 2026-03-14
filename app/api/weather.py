@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 
 from app.dependencies.services import get_weather_service
 from app.dependencies.cookies import get_cookies_service
-from app.schemas.weather import CurrentWeatherResponse, ForecastResponse
+from app.schemas.weather import (
+    CitySuggestionResponse,
+    CurrentWeatherResponse,
+    ForecastResponse,
+)
 from app.services.weather_service import WeatherService
 from app.services.cookies_service import CookiesService
 
@@ -156,3 +160,11 @@ def remove_favorite(
         samesite="lax",
     )
     return {"favorites": favorites}
+
+@router.get("/weather/cities", response_model=list[CitySuggestionResponse])
+def search_cities(
+        q: str = Query(..., min_length=2, max_length=64, strip_whitespace=True),
+        limit: int = Query(5, ge=1, le=10),
+        service: WeatherService = Depends(get_weather_service),
+):
+    return service.search_cities(query=q, limit=limit)

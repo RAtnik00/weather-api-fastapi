@@ -4,7 +4,11 @@ from app.cache.weather_cache_protocol import WeatherCacheProtocol
 from app.clients.weather_client import WeatherClient
 from app.mappers.current_weather_mapper import CurrentWeatherMapper
 from app.mappers.forecast_mapper import ForecastMapper
-from app.schemas.weather import CurrentWeatherResponse, ForecastResponse
+from app.schemas.weather import (
+    CitySuggestionResponse,
+    CurrentWeatherResponse,
+    ForecastResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -81,3 +85,22 @@ class WeatherService:
             city=forecast.city,
             days=ForecastMapper.build_days(forecast.items),
         )
+
+    def search_cities(self, query: str, limit: int = 5) -> list[CitySuggestionResponse]:
+        normalized_query = query.strip()
+        if not normalized_query:
+            return []
+
+        safe_limit = max(1, min(limit, 10))
+        suggestions = self.client.search_cities(normalized_query, limit=safe_limit)
+
+        return [
+            CitySuggestionResponse(
+                name=item.name,
+                country=item.country,
+                state=item.state,
+                lat=item.lat,
+                lon=item.lon,
+            )
+            for item in suggestions
+        ]
