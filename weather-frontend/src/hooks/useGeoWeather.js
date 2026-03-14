@@ -5,20 +5,21 @@ import {
     useForecast,
     useForecastByCoords,
 } from "../services/useWeather";
-
-const DEFAULT_CITY = "Warsaw";
-const CONSENT_STORAGE_KEY = "weather_geo_cache_consent";
-const COORDS_STORAGE_KEY = "weather_coords";
+import {
+    DEFAULT_CITY,
+    DEFAULT_COOKIE_CONSENT,
+    STORAGE_KEYS,
+} from "../constants/weather";
 
 function getStoredConsent() {
-    return localStorage.getItem(CONSENT_STORAGE_KEY) || "unset";
+    return localStorage.getItem(STORAGE_KEYS.cookieConsent) || DEFAULT_COOKIE_CONSENT;
 }
 
 function getStoredCoords() {
-    const consent = localStorage.getItem(CONSENT_STORAGE_KEY);
+    const consent = localStorage.getItem(STORAGE_KEYS.cookieConsent);
     if (consent !== "accepted") return null;
 
-    const raw = localStorage.getItem(COORDS_STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEYS.coords);
     if (!raw) return null;
 
     try {
@@ -38,10 +39,10 @@ function getStoredCoords() {
 }
 
 function shouldUseStoredGeolocation() {
-    const consent = localStorage.getItem(CONSENT_STORAGE_KEY);
+    const consent = localStorage.getItem(STORAGE_KEYS.cookieConsent);
     if (consent !== "accepted") return false;
 
-    return Boolean(localStorage.getItem(COORDS_STORAGE_KEY));
+    return Boolean(localStorage.getItem(STORAGE_KEYS.coords));
 }
 
 export function useGeoWeather(selectedCity) {
@@ -84,7 +85,10 @@ export function useGeoWeather(selectedCity) {
                 setPendingCoords(nextCoords);
 
                 if (geoCacheConsent === "accepted") {
-                    localStorage.setItem(COORDS_STORAGE_KEY, JSON.stringify(nextCoords));
+                    localStorage.setItem(
+                        STORAGE_KEYS.coords,
+                        JSON.stringify(nextCoords)
+                    );
                 }
 
                 setCoords(nextCoords);
@@ -122,28 +126,30 @@ export function useGeoWeather(selectedCity) {
 
     function handleAcceptGeoCache() {
         setGeoCacheConsent("accepted");
-        localStorage.setItem(CONSENT_STORAGE_KEY, "accepted");
+        localStorage.setItem(STORAGE_KEYS.cookieConsent, "accepted");
 
         if (pendingCoords) {
-            localStorage.setItem(COORDS_STORAGE_KEY, JSON.stringify(pendingCoords));
+            localStorage.setItem(
+                STORAGE_KEYS.coords,
+                JSON.stringify(pendingCoords)
+            );
             setCoords(pendingCoords);
         }
     }
 
     function handleDeclineGeoCache() {
         setGeoCacheConsent("declined");
-        localStorage.setItem(CONSENT_STORAGE_KEY, "declined");
-        localStorage.removeItem(COORDS_STORAGE_KEY);
+        localStorage.setItem(STORAGE_KEYS.cookieConsent, "declined");
+        localStorage.removeItem(STORAGE_KEYS.coords);
         setCoords(null);
         setPendingCoords(null);
         setUseGeoWeatherMode(false);
     }
 
     const mustAnswerConsent =
-        geoResolved && pendingCoords && geoCacheConsent === "unset";
+        geoResolved && pendingCoords && geoCacheConsent === DEFAULT_COOKIE_CONSENT;
 
-    const activeCity =
-        currentQ.data?.city || selectedCity || DEFAULT_CITY;
+    const activeCity = currentQ.data?.city || selectedCity || DEFAULT_CITY;
 
     return {
         currentQ,
@@ -151,10 +157,6 @@ export function useGeoWeather(selectedCity) {
         geoResolved,
         mustAnswerConsent,
         activeCity,
-        geoCacheConsent,
-        coords,
-        pendingCoords,
-        useGeoWeatherMode,
         selectCityMode,
         handleAcceptGeoCache,
         handleDeclineGeoCache,
