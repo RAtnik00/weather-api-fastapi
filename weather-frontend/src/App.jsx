@@ -1,14 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     useAddFavorite,
-    useCurrentWeather,
-    useCurrentWeatherByCoords,
     useFavorites,
-    useForecast,
-    useForecastByCoords,
     useHistory,
     useRemoveFavorite,
 } from "./services/useWeather";
+import { useGeoWeather } from "./hooks/useGeoWeather";
 import SearchBar from "./components/SearchBar";
 import CurrentWeatherCard from "./components/CurrentWeatherCard";
 import ForecastCard from "./components/ForecastCard";
@@ -16,44 +13,6 @@ import HistoryCard from "./components/HistoryCard";
 import FavoritesCard from "./components/FavoritesCard";
 import QuickActionsCard from "./components/QuickActionsCard";
 import "./App.css";
-
-const DEFAULT_CITY = "Warsaw";
-const CONSENT_STORAGE_KEY = "weather_geo_cache_consent";
-const COORDS_STORAGE_KEY = "weather_coords";
-
-function getStoredConsent() {
-    return localStorage.getItem(CONSENT_STORAGE_KEY) || "unset";
-}
-
-function getStoredCoords() {
-    const consent = localStorage.getItem(CONSENT_STORAGE_KEY);
-    if (consent !== "accepted") return null;
-
-    const raw = localStorage.getItem(COORDS_STORAGE_KEY);
-    if (!raw) return null;
-
-    try {
-        const parsed = JSON.parse(raw);
-
-        if (
-            typeof parsed?.lat === "number" &&
-            typeof parsed?.lon === "number"
-        ) {
-            return parsed;
-        }
-    } catch {
-        return null;
-    }
-
-    return null;
-}
-
-function shouldUseStoredGeolocation() {
-    const consent = localStorage.getItem(CONSENT_STORAGE_KEY);
-    if (consent !== "accepted") return false;
-
-    return Boolean(localStorage.getItem(COORDS_STORAGE_KEY));
-}
 
 function renderInitialLayout({ input, setInput, onSearch, leftText, rightText }) {
     return (
@@ -117,20 +76,17 @@ function renderConsentModal({ onAccept, onDecline }) {
 export default function App() {
     const [input, setInput] = useState("");
     const [selectedCity, setSelectedCity] = useState("");
-    const [geoCacheConsent, setGeoCacheConsent] = useState(getStoredConsent);
-    const [pendingCoords, setPendingCoords] = useState(null);
-    const [coords, setCoords] = useState(getStoredCoords);
-    const [useGeoWeather, setUseGeoWeather] = useState(shouldUseStoredGeolocation);
-    const [geoResolved, setGeoResolved] = useState(shouldUseStoredGeolocation);
 
-    const didTryGeolocationRef = useRef(false);
-    const lastHistorySyncCityRef = useRef(null);
-
-    const currentByCityQ = useCurrentWeather(selectedCity);
-    const forecastByCityQ = useForecast(selectedCity);
-
-    const currentByCoordsQ = useCurrentWeatherByCoords(coords?.lat, coords?.lon);
-    const forecastByCoordsQ = useForecastByCoords(coords?.lat, coords?.lon);
+    const {
+        currentQ,
+        forecastQ,
+        geoResolved,
+        mustAnswerConsent,
+        activeCity,
+        selectCityMode,
+        handleAcceptGeoCache,
+        handleDeclineGeoCache,
+    } = useGeoWeather(selectedCity);
 
     const historyQ = useHistory();
     const favoritesQ = useFavorites();
@@ -138,132 +94,60 @@ export default function App() {
     const addFavoriteM = useAddFavorite();
     const removeFavoriteM = useRemoveFavorite();
 
-    useEffect(() => {
-        if (didTryGeolocationRef.current) return;
-        didTryGeolocationRef.current = true;
-
-        if (!("geolocation" in navigator)) {
-            if (!coords) {
-                setSelectedCity(DEFAULT_CITY);
-                setUseGeoWeather(false);
-            }
-
-            setGeoResolved(true);
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const nextCoords = {
-                    lat: position.coords.latitude,
-                    lon: position.coords.longitude,
-                };
-
-                setPendingCoords(nextCoords);
-
-                if (geoCacheConsent === "accepted") {
-                    localStorage.setItem(COORDS_STORAGE_KEY, JSON.stringify(nextCoords));
-                }
-
-                setCoords(nextCoords);
-                setUseGeoWeather(true);
-                setGeoResolved(true);
-            },
-            (error) => {
-                console.warn("Geolocation denied or unavailable:", error);
-
-                if (!coords) {
-                    setSelectedCity(DEFAULT_CITY);
-                    setUseGeoWeather(false);
-                }
-
-                setGeoResolved(true);
-            },
-            {
-                enableHighAccuracy: false,
-                timeout: 2500,
-                maximumAge: 900000,
-            }
-        );
-    }, [coords, geoCacheConsent]);
-
-    const currentQ = useMemo(() => {
-        return useGeoWeather && coords ? currentByCoordsQ : currentByCityQ;
-    }, [useGeoWeather, coords, currentByCoordsQ, currentByCityQ]);
-
-    const forecastQ = useMemo(() => {
-        return useGeoWeather && coords ? forecastByCoordsQ : forecastByCityQ;
-    }, [useGeoWeather, coords, forecastByCoordsQ, forecastByCityQ]);
+    const lastHistorySyncCityRef = useRef(null);
 
     useEffect(() => {
-        const activeWeatherCity = currentQ.data?.city;
-        if (!activeWeatherCity) return;
-        if (lastHistorySyncCityRef.current === activeWeatherCity) return;
+        const resolvedCity = currentQ.data?.city;
+        if (!resolvedCity) return;
+        if (lastHistorySyncCityRef.current === resolvedCity) return;
 
-        lastHistorySyncCityRef.current = activeWeatherCity;
+        lastHistorySyncCityRef.current = resolvedCity;
         historyQ.refetch();
     }, [currentQ.data?.city, historyQ]);
 
-    const handleSearch = () => {
+    function handleSearch() {
         const nextCity = input.trim();
         if (!nextCity) return;
 
-        setUseGeoWeather(false);
+        selectCityMode();
         setSelectedCity(nextCity);
-    };
+    }
 
-    const handleSelectCity = (nextCity) => {
+    function handleSelectCity(nextCity) {
         setInput(nextCity);
-        setUseGeoWeather(false);
+        selectCityMode();
         setSelectedCity(nextCity);
-    };
+    }
 
-    const handleAddFavorite = (targetCity) => {
+    function handleAddFavorite(targetCity) {
         const nextCity = targetCity?.trim();
         if (!nextCity) return;
 
         addFavoriteM.mutate(nextCity);
-    };
+    }
 
-    const handleRemoveFavorite = (targetCity) => {
+    function handleRemoveFavorite(targetCity) {
         removeFavoriteM.mutate(targetCity);
-    };
+    }
 
-    const handleRefresh = () => {
+    function handleRefresh() {
         currentQ.refetch();
         forecastQ.refetch();
         historyQ.refetch();
         favoritesQ.refetch();
-    };
+    }
 
-    const handleAcceptGeoCache = () => {
-        setGeoCacheConsent("accepted");
-        localStorage.setItem(CONSENT_STORAGE_KEY, "accepted");
-
-        if (pendingCoords) {
-            localStorage.setItem(COORDS_STORAGE_KEY, JSON.stringify(pendingCoords));
-            setCoords(pendingCoords);
-        }
-
+    function handleAcceptConsent() {
+        handleAcceptGeoCache();
         historyQ.refetch();
         favoritesQ.refetch();
-    };
+    }
 
-    const handleDeclineGeoCache = () => {
-        setGeoCacheConsent("declined");
-        localStorage.setItem(CONSENT_STORAGE_KEY, "declined");
-        localStorage.removeItem(COORDS_STORAGE_KEY);
-        setCoords(null);
-        setPendingCoords(null);
-        setUseGeoWeather(false);
-
+    function handleDeclineConsent() {
+        handleDeclineGeoCache();
         historyQ.refetch();
         favoritesQ.refetch();
-    };
-
-    const activeCity = currentQ.data?.city || selectedCity;
-    const mustAnswerConsent =
-        geoResolved && pendingCoords && geoCacheConsent === "unset";
+    }
 
     if (!geoResolved) {
         return renderInitialLayout({
@@ -279,8 +163,8 @@ export default function App() {
         <div className="page">
             {mustAnswerConsent &&
                 renderConsentModal({
-                    onAccept: handleAcceptGeoCache,
-                    onDecline: handleDeclineGeoCache,
+                    onAccept: handleAcceptConsent,
+                    onDecline: handleDeclineConsent,
                 })}
 
             <div className="shell">
