@@ -36,6 +36,16 @@ function mapFavorites(data) {
     return data.favorites || [];
 }
 
+function mapCitySuggestion(item) {
+    return {
+        name: item.name,
+        country: item.country,
+        state: item.state ?? null,
+        lat: item.lat ?? null,
+        lon: item.lon ?? null,
+    };
+}
+
 export async function fetchCurrentWeather(city) {
     const { data } = await api.get("/weather/current", {
         params: { location: city },
@@ -86,4 +96,18 @@ export async function addFavorite(city) {
 export async function removeFavorite(city) {
     const { data } = await api.delete(`/favorites/${encodeURIComponent(city)}`);
     return mapFavorites(data);
+}
+
+export async function fetchCitySuggestions(query) {
+    const normalizedQuery = query.trim();
+
+    if (normalizedQuery.length < 2) {
+        return [];
+    }
+
+    const { data } = await api.get("/weather/cities", {
+        params: { q: normalizedQuery, limit: 5 },
+    });
+
+    return Array.isArray(data) ? data.map(mapCitySuggestion) : [];
 }

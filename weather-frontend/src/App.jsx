@@ -105,8 +105,8 @@ export default function App() {
         historyQ.refetch();
     }, [currentQ.data?.city, historyQ]);
 
-    function handleSearch() {
-        const nextCity = input.trim();
+    function handleSearch(nextCityOverride) {
+        const nextCity = (nextCityOverride ?? input).trim();
         if (!nextCity) return;
 
         selectCityMode();

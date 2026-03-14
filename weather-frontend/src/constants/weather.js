@@ -14,4 +14,5 @@ export const WEATHER_QUERY_KEYS = {
     forecastByCoords: (lat, lon) => ["weather", "forecast", "coords", lat, lon],
     history: () => ["weather", "history"],
     favorites: () => ["weather", "favorites"],
+    citySuggestions: (query) => ["weather", "city-suggestions", query],
 };
