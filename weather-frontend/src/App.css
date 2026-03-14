@@ -353,6 +353,30 @@
   flex-wrap: wrap;
 }
 
+.consentActions button {
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.consentActions button:hover {
+  background: rgba(255,255,255,0.16);
+}
+
+.consentActions button:first-child {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.consentActions button:first-child:hover {
+  background: #2563eb;
+}
+
 .searchWrap {
   position: relative;
   min-width: 520px;

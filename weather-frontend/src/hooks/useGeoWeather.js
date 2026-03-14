@@ -42,7 +42,42 @@ function shouldUseStoredGeolocation() {
     const consent = localStorage.getItem(STORAGE_KEYS.cookieConsent);
     if (consent !== "accepted") return false;
 
-    return Boolean(localStorage.getItem(STORAGE_KEYS.coords));
+    const raw = localStorage.getItem(STORAGE_KEYS.coords);
+    if (!raw) return false;
+
+    try {
+        const parsed = JSON.parse(raw);
+        return (
+            typeof parsed?.lat === "number" &&
+            typeof parsed?.lon === "number"
+        );
+    } catch {
+        return false;
+    }
+}
+
+function isGeolocationSupported() {
+    return typeof navigator !== "undefined" && "geolocation" in navigator;
+}
+
+function getGeoErrorMessage(error) {
+    if (!error) {
+        return "Unknown geolocation error";
+    }
+
+    if (error.code === 1) {
+        return "Geolocation permission denied";
+    }
+
+    if (error.code === 2) {
+        return "Geolocation position unavailable";
+    }
+
+    if (error.code === 3) {
+        return "Geolocation request timed out";
+    }
+
+    return error.message || "Unknown geolocation error";
 }
 
 export function useGeoWeather(selectedCity) {
@@ -66,11 +101,8 @@ export function useGeoWeather(selectedCity) {
         if (didTryGeolocationRef.current) return;
         didTryGeolocationRef.current = true;
 
-        if (!("geolocation" in navigator)) {
-            if (!coords) {
-                setUseGeoWeatherMode(false);
-            }
-
+        if (!isGeolocationSupported()) {
+            setUseGeoWeatherMode(false);
             setGeoResolved(true);
             return;
         }
@@ -83,6 +115,9 @@ export function useGeoWeather(selectedCity) {
                 };
 
                 setPendingCoords(nextCoords);
+                setCoords(nextCoords);
+                setUseGeoWeatherMode(true);
+                setGeoResolved(true);
 
                 if (geoCacheConsent === "accepted") {
                     localStorage.setItem(
@@ -90,27 +125,26 @@ export function useGeoWeather(selectedCity) {
                         JSON.stringify(nextCoords)
                     );
                 }
-
-                setCoords(nextCoords);
-                setUseGeoWeatherMode(true);
-                setGeoResolved(true);
             },
             (error) => {
-                console.warn("Geolocation denied or unavailable:", error);
+                const message = getGeoErrorMessage(error);
 
-                if (!coords) {
-                    setUseGeoWeatherMode(false);
+                if (error?.code === 1) {
+                    console.info(message);
+                } else {
+                    console.warn(message);
                 }
 
+                setUseGeoWeatherMode(false);
                 setGeoResolved(true);
             },
             {
                 enableHighAccuracy: false,
-                timeout: 2500,
-                maximumAge: 900000,
+                timeout: 10000,
+                maximumAge: 5 * 60 * 1000,
             }
         );
-    }, [coords, geoCacheConsent]);
+    }, [geoCacheConsent]);
 
     const currentQ = useMemo(() => {
         return useGeoWeatherMode && coords ? currentByCoordsQ : currentByCityQ;
@@ -134,6 +168,7 @@ export function useGeoWeather(selectedCity) {
                 JSON.stringify(pendingCoords)
             );
             setCoords(pendingCoords);
+            setUseGeoWeatherMode(true);
         }
     }
 
@@ -141,13 +176,19 @@ export function useGeoWeather(selectedCity) {
         setGeoCacheConsent("declined");
         localStorage.setItem(STORAGE_KEYS.cookieConsent, "declined");
         localStorage.removeItem(STORAGE_KEYS.coords);
-        setCoords(null);
+
+        if (pendingCoords) {
+            setCoords(pendingCoords);
+            setUseGeoWeatherMode(true);
+        }
+
         setPendingCoords(null);
-        setUseGeoWeatherMode(false);
     }
 
     const mustAnswerConsent =
-        geoResolved && pendingCoords && geoCacheConsent === DEFAULT_COOKIE_CONSENT;
+        geoResolved &&
+        pendingCoords &&
+        geoCacheConsent === DEFAULT_COOKIE_CONSENT;
 
     const activeCity = currentQ.data?.city || selectedCity || DEFAULT_CITY;
 
