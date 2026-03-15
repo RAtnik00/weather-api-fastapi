@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const STORAGE_KEYS = {
     cookieConsent: "weather_geo_cache_consent",
