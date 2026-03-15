@@ -11,11 +11,13 @@ function hasValue(value) {
 }
 
 function buildUrl(path, params) {
-    const base = BASE_URL
-        ? new URL(BASE_URL, window.location.origin)
-        : window.location.origin;
+    const normalizedPath = String(path).replace(/^\/+/, "");
 
-    const url = new URL(path, base);
+    const base = BASE_URL
+        ? new URL(BASE_URL.replace(/\/+$/, "") + "/", window.location.origin)
+        : new URL("/", window.location.origin);
+
+    const url = new URL(normalizedPath, base);
 
     if (!params || typeof params !== "object") {
         return url.toString();
