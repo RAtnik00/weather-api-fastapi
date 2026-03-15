@@ -9,6 +9,13 @@ class CookiesService:
     FAVORITES_KEY = "weather_favorites"
     CONSENT_HEADER = "x-cookie-consent"
 
+    COOKIE_OPTIONS = {
+        "httponly": True,
+        "secure": True,
+        "samesite": "none",
+        "path": "/",
+    }
+
     def _decode_cookie_list(self, raw: str | None) -> list[str]:
         if not raw:
             return []
@@ -33,8 +40,18 @@ class CookiesService:
         return consent == "accepted"
 
     def clear_weather_cookies(self, response: Response) -> None:
-        response.delete_cookie(key=self.HISTORY_KEY, httponly=True, samesite="lax")
-        response.delete_cookie(key=self.FAVORITES_KEY, httponly=True, samesite="lax")
+        response.delete_cookie(
+            key=self.HISTORY_KEY,
+            path="/",
+            secure=True,
+            samesite="none",
+        )
+        response.delete_cookie(
+            key=self.FAVORITES_KEY,
+            path="/",
+            secure=True,
+            samesite="none",
+        )
 
     def get_history(self, cookies: dict[str, str]) -> list[str]:
         raw = cookies.get(self.HISTORY_KEY)
