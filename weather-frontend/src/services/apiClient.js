@@ -7,6 +7,10 @@ const STORAGE_KEYS = {
 const DEFAULT_CONSENT = "unset";
 
 function hasValue(value) {
+    return value !== undefined && value !== null && String(value).length > 0;
+}
+
+function buildUrl(path, params) {
     const base = BASE_URL || window.location.origin;
     const url = new URL(path, base);
 
