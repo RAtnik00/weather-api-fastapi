@@ -11,7 +11,11 @@ function hasValue(value) {
 }
 
 function buildUrl(path, params) {
-    const url = new URL(path, BASE_URL || window.location.origin);
+    const base = BASE_URL
+        ? new URL(BASE_URL, window.location.origin)
+        : window.location.origin;
+
+    const url = new URL(path, base);
 
     if (!params || typeof params !== "object") {
         return url.toString();
