@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const STORAGE_KEYS = {
     cookieConsent: "weather_geo_cache_consent",
@@ -11,13 +11,8 @@ function hasValue(value) {
 }
 
 function buildUrl(path, params) {
-    const normalizedPath = String(path).replace(/^\/+/, "");
-
-    const base = BASE_URL
-        ? new URL(BASE_URL.replace(/\/+$/, "") + "/", window.location.origin)
-        : new URL("/", window.location.origin);
-
-    const url = new URL(normalizedPath, base);
+    const base = BASE_URL || window.location.origin;
+    const url = new URL(path, base);
 
     if (!params || typeof params !== "object") {
         return url.toString();
