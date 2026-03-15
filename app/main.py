@@ -6,9 +6,15 @@ from app.api.weather import router as weather_router
 
 app = FastAPI()
 
+origins = [
+    "https://weather-api-fastapi.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
