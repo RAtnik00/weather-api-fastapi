@@ -1,0 +1,221 @@
+# Weather Dashboard ☀️🌧️
+
+A full‑stack weather application that allows users to check the current
+weather, view forecasts, and manage favorite locations.
+
+This project consists of:
+
+-   FastAPI backend
+-   React frontend (Vite)
+-   Integration with OpenWeather API
+-   Production deployment
+
+Backend and frontend are deployed separately:
+
+-   Backend: Render
+-   Frontend: Vercel
+
+------------------------------------------------------------------------
+
+# Live Architecture
+
+Frontend (React / Vercel) ↓ REST API ↓ Backend (FastAPI / Render) ↓
+OpenWeather API
+
+------------------------------------------------------------------------
+
+# Features
+
+Users can:
+
+-   Search weather by city
+-   Get weather using current geolocation
+-   View multi‑day forecast
+-   Save cities to Favorites
+-   View Search History
+-   Receive city suggestions while typing
+
+Favorites and history are stored in browser cookies.
+
+------------------------------------------------------------------------
+
+# Tech Stack
+
+Backend
+
+-   FastAPI
+-   Pydantic
+-   HTTPX
+-   Pytest
+
+Frontend
+
+-   React
+-   Vite
+-   React Query
+
+Infrastructure
+
+-   Render --- backend hosting
+-   Vercel --- frontend hosting
+
+------------------------------------------------------------------------
+
+# Project Structure
+
+    weather-api-fastapi
+    │
+    ├── app/
+    │   ├── api/
+    │   ├── clients/
+    │   ├── services/
+    │   ├── schemas/
+    │   ├── mappers/
+    │   └── dependencies/
+    │
+    ├── weather-frontend/
+    │
+    ├── tests/
+    │
+    └── pyproject.toml
+
+------------------------------------------------------------------------
+
+# Production Deployment
+
+The application is deployed as a split full‑stack architecture.
+
+Backend hosted on Render.
+
+Frontend hosted on Vercel.
+
+Cross‑site cookies are enabled using:
+
+SameSite=None\
+Secure=True
+
+This allows the frontend to store cookies from the backend for:
+
+-   search history
+-   favorite cities
+
+------------------------------------------------------------------------
+
+# API Endpoints
+
+Current Weather
+
+GET /weather/current?location=Warsaw
+
+Forecast
+
+GET /weather/forecast?location=Warsaw
+
+Weather by Coordinates
+
+GET /weather/current/by-coords?lat=52.23&lon=21.01
+
+Forecast by Coordinates
+
+GET /weather/forecast/by-coords?lat=52.23&lon=21.01
+
+Search History
+
+GET /history
+
+Favorites
+
+GET /favorites\
+POST /favorites/{city}\
+DELETE /favorites/{city}
+
+City Suggestions
+
+GET /weather/cities?q=war
+
+------------------------------------------------------------------------
+
+# Environment Variables
+
+The .env file is not included in the repository.
+
+Example:
+
+OPENWEATHER_API_KEY=your_api_key
+
+------------------------------------------------------------------------
+
+# Local Backend Setup
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Run the server:
+
+uvicorn app.main:app --reload
+
+Server will run on:
+
+http://127.0.0.1:8000
+
+Swagger documentation:
+
+http://127.0.0.1:8000/docs
+
+------------------------------------------------------------------------
+
+# Local Frontend Setup
+
+Navigate to the frontend folder:
+
+cd weather-frontend
+
+Install dependencies:
+
+npm install
+
+Run development server:
+
+npm run dev
+
+Frontend will run on:
+
+http://localhost:5173
+
+------------------------------------------------------------------------
+
+# Running Tests
+
+Backend tests use pytest.
+
+Run:
+
+pytest
+
+------------------------------------------------------------------------
+
+# Future Improvements
+
+Possible improvements:
+
+-   User authentication
+-   Database storage for favorites
+-   Weather API caching
+-   Docker containerization
+-   CI/CD pipeline
+
+------------------------------------------------------------------------
+
+# Author
+
+Dmytro Yaremenko
+
+This project was fully designed and developed independently as a
+full‑stack practice project using:
+
+-   FastAPI
+-   React
+-   REST API architecture
+-   External API integration
+-   Production deployment
