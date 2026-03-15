@@ -35,8 +35,7 @@ def current_weather(
         response.set_cookie(
             key=cookies_service.HISTORY_KEY,
             value=cookies_service.encode_history(history),
-            httponly=True,
-            samesite="lax",
+            **cookies_service.COOKIE_OPTIONS,
         )
     else:
         cookies_service.clear_weather_cookies(response)
@@ -70,8 +69,7 @@ def current_weather_by_coords(
         response.set_cookie(
             key=cookies_service.HISTORY_KEY,
             value=cookies_service.encode_history(history),
-            httponly=True,
-            samesite="lax",
+            **cookies_service.COOKIE_OPTIONS,
         )
     else:
         cookies_service.clear_weather_cookies(response)
@@ -133,8 +131,7 @@ def add_favorite(
     response.set_cookie(
         key=cookies_service.FAVORITES_KEY,
         value=cookies_service.encode_favorites(favorites),
-        httponly=True,
-        samesite="lax",
+        **cookies_service.COOKIE_OPTIONS,
     )
     return {"favorites": favorites}
 
@@ -156,15 +153,15 @@ def remove_favorite(
     response.set_cookie(
         key=cookies_service.FAVORITES_KEY,
         value=cookies_service.encode_favorites(favorites),
-        httponly=True,
-        samesite="lax",
+        **cookies_service.COOKIE_OPTIONS,
     )
     return {"favorites": favorites}
 
+
 @router.get("/weather/cities", response_model=list[CitySuggestionResponse])
 def search_cities(
-        q: str = Query(..., min_length=2, max_length=64, strip_whitespace=True),
-        limit: int = Query(5, ge=1, le=10),
-        service: WeatherService = Depends(get_weather_service),
+    q: str = Query(..., min_length=2, max_length=64, strip_whitespace=True),
+    limit: int = Query(5, ge=1, le=10),
+    service: WeatherService = Depends(get_weather_service),
 ):
     return service.search_cities(query=q, limit=limit)
