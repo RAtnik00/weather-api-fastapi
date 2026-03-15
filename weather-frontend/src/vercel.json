@@ -1,8 +1,9 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://weather-api-fastapi-2vl1.onrender.com/$1"
+      "source": "/api/:path*",
+      "destination": "https://weather-api-fastapi-2vl1.onrender.com/:path*"
     }
   ]
 }
