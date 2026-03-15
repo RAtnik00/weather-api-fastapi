@@ -1,5 +1,10 @@
 import api from "./apiClient";
 
+const STORAGE_KEYS = {
+    history: "weather_history",
+    favorites: "weather_favorites",
+};
+
 function mapCurrentWeather(data) {
     return {
         city: data.city,
@@ -28,14 +33,6 @@ function mapForecast(data) {
     };
 }
 
-function mapHistory(data) {
-    return data.history || [];
-}
-
-function mapFavorites(data) {
-    return data.favorites || [];
-}
-
 function mapCitySuggestion(item) {
     return {
         name: item.name,
@@ -46,12 +43,90 @@ function mapCitySuggestion(item) {
     };
 }
 
+function readStoredList(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+            .map((item) => String(item).trim())
+            .filter(Boolean);
+    } catch {
+        return [];
+    }
+}
+
+function writeStoredList(key, values) {
+    const normalized = values
+        .map((item) => String(item).trim())
+        .filter(Boolean);
+
+    localStorage.setItem(key, JSON.stringify(normalized));
+}
+
+function dedupeCaseInsensitive(items, limit) {
+    const seen = new Set();
+    const result = [];
+
+    for (const item of items) {
+        const normalized = String(item).trim();
+        const compareKey = normalized.toLowerCase();
+
+        if (!normalized || seen.has(compareKey)) {
+            continue;
+        }
+
+        seen.add(compareKey);
+        result.push(normalized);
+
+        if (result.length >= limit) {
+            break;
+        }
+    }
+
+    return result;
+}
+
+function getHistoryList() {
+    return readStoredList(STORAGE_KEYS.history);
+}
+
+function getFavoritesList() {
+    return readStoredList(STORAGE_KEYS.favorites);
+}
+
+function saveHistoryList(items) {
+    writeStoredList(STORAGE_KEYS.history, items);
+}
+
+function saveFavoritesList(items) {
+    writeStoredList(STORAGE_KEYS.favorites, items);
+}
+
+function pushHistory(city) {
+    const normalizedCity = String(city || "").trim();
+    if (!normalizedCity) return getHistoryList();
+
+    const nextHistory = dedupeCaseInsensitive(
+        [normalizedCity, ...getHistoryList()],
+        10
+    );
+
+    saveHistoryList(nextHistory);
+    return nextHistory;
+}
+
 export async function fetchCurrentWeather(city) {
     const { data } = await api.get("/weather/current", {
         params: { location: city },
     });
 
-    return mapCurrentWeather(data);
+    const mapped = mapCurrentWeather(data);
+    pushHistory(mapped.city);
+    return mapped;
 }
 
 export async function fetchCurrentWeatherByCoords(lat, lon) {
@@ -59,7 +134,9 @@ export async function fetchCurrentWeatherByCoords(lat, lon) {
         params: { lat, lon },
     });
 
-    return mapCurrentWeather(data);
+    const mapped = mapCurrentWeather(data);
+    pushHistory(mapped.city);
+    return mapped;
 }
 
 export async function fetchForecast(city) {
@@ -79,23 +156,37 @@ export async function fetchForecastByCoords(lat, lon) {
 }
 
 export async function fetchHistory() {
-    const { data } = await api.get("/history");
-    return mapHistory(data);
+    return getHistoryList();
 }
 
 export async function fetchFavorites() {
-    const { data } = await api.get("/favorites");
-    return mapFavorites(data);
+    return getFavoritesList();
 }
 
 export async function addFavorite(city) {
-    const { data } = await api.post(`/favorites/${encodeURIComponent(city)}`);
-    return mapFavorites(data);
+    const normalizedCity = String(city || "").trim();
+    if (!normalizedCity) {
+        return getFavoritesList();
+    }
+
+    const nextFavorites = dedupeCaseInsensitive(
+        [normalizedCity, ...getFavoritesList()],
+        50
+    );
+
+    saveFavoritesList(nextFavorites);
+    return nextFavorites;
 }
 
 export async function removeFavorite(city) {
-    const { data } = await api.delete(`/favorites/${encodeURIComponent(city)}`);
-    return mapFavorites(data);
+    const normalizedCity = String(city || "").trim().toLowerCase();
+
+    const nextFavorites = getFavoritesList().filter(
+        (item) => item.trim().toLowerCase() !== normalizedCity
+    );
+
+    saveFavoritesList(nextFavorites);
+    return nextFavorites;
 }
 
 export async function fetchCitySuggestions(query) {
