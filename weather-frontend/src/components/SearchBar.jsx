@@ -67,20 +67,25 @@ export default function SearchBar({ input, setInput, onSearch }) {
         }));
     }, [suggestionsQ.data]);
 
-    useEffect(() => {
-        setActiveIndex(suggestions.length > 0 ? 0 : -1);
-    }, [suggestions]);
-
     const shouldShowSuggestions =
         isOpen &&
         debouncedInput.length >= 2 &&
         suggestions.length > 0;
 
+    const visibleActiveIndex =
+        suggestions.length > 0
+            ? Math.min(Math.max(activeIndex, 0), suggestions.length - 1)
+            : -1;
+
     function handleSubmit(event) {
         event.preventDefault();
 
-        if (shouldShowSuggestions && activeIndex >= 0 && suggestions[activeIndex]) {
-            handleSelectSuggestion(suggestions[activeIndex]);
+        if (
+            shouldShowSuggestions &&
+            visibleActiveIndex >= 0 &&
+            suggestions[visibleActiveIndex]
+        ) {
+            handleSelectSuggestion(suggestions[visibleActiveIndex]);
             return;
         }
 
@@ -185,7 +190,7 @@ export default function SearchBar({ input, setInput, onSearch }) {
                                 key={`${item.searchValue}-${index}`}
                                 type="button"
                                 className={`suggestionItem ${
-                                    index === activeIndex ? "active" : ""
+                                    index === visibleActiveIndex ? "active" : ""
                                 }`}
                                 onMouseDown={(event) => {
                                     event.preventDefault();

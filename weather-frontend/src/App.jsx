@@ -12,44 +12,8 @@ import ForecastCard from "./features/weather/components/ForecastCard";
 import HistoryCard from "./features/weather/components/HistoryCard";
 import FavoritesCard from "./features/weather/components/FavoritesCard";
 import QuickActionsCard from "./features/weather/components/QuickActionsCard";
+import { DEFAULT_CITY } from "./constants/weather";
 import "./App.css";
-
-function renderInitialLayout({ input, setInput, onSearch, leftText, rightText }) {
-    return (
-        <div className="page">
-            <div className="shell">
-                <header className="topbar">
-                    <div>
-                        <div className="h1">Weather</div>
-                        <div className="sub">Desktop dashboard</div>
-                    </div>
-
-                    <SearchBar
-                        input={input}
-                        setInput={setInput}
-                        onSearch={onSearch}
-                    />
-                </header>
-
-                <main className="grid">
-                    <section className="colLeft">
-                        <div className="card">
-                            <div className="cardTitle">Current</div>
-                            <div className="muted">{leftText}</div>
-                        </div>
-                    </section>
-
-                    <section className="rightCol">
-                        <div className="card">
-                            <div className="cardTitle">Forecast</div>
-                            <div className="muted">{rightText}</div>
-                        </div>
-                    </section>
-                </main>
-            </div>
-        </div>
-    );
-}
 
 function renderConsentModal({ onAccept, onDecline }) {
     return (
@@ -74,13 +38,12 @@ function renderConsentModal({ onAccept, onDecline }) {
 }
 
 export default function App() {
-    const [input, setInput] = useState("");
-    const [selectedCity, setSelectedCity] = useState("");
+    const [input, setInput] = useState(DEFAULT_CITY);
+    const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
 
     const {
         currentQ,
         forecastQ,
-        geoResolved,
         mustAnswerConsent,
         activeCity,
         selectCityMode,
@@ -147,16 +110,6 @@ export default function App() {
         handleDeclineGeoCache();
         historyQ.refetch();
         favoritesQ.refetch();
-    }
-
-    if (!geoResolved) {
-        return renderInitialLayout({
-            input,
-            setInput,
-            onSearch: handleSearch,
-            leftText: "Detecting your location...",
-            rightText: "Waiting for weather data...",
-        });
     }
 
     return (
