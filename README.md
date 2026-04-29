@@ -34,8 +34,28 @@ Users can:
 -   Save cities to Favorites
 -   View Search History
 -   Receive city suggestions while typing
+-   Switch between System, Dark, and Light blue themes
+-   Keep the selected theme after page reload
 
-Favorites and history are stored in browser cookies.
+Favorites and history are stored locally in the browser.
+
+------------------------------------------------------------------------
+
+# Latest Update
+
+The project received a frontend update focused on startup speed and user
+experience.
+
+Added and improved:
+
+-   Default city weather now loads immediately on first render
+-   Geolocation no longer blocks the initial dashboard load
+-   System / Dark / Light theme selector
+-   System theme mode follows the device color scheme
+-   Smooth animated transition between dark blue and light blue themes
+-   Sliding segmented control for theme selection
+-   Theme preference is saved in localStorage
+-   Generated Python cache files are ignored and removed from git tracking
 
 ------------------------------------------------------------------------
 
@@ -53,6 +73,8 @@ Frontend
 -   React
 -   Vite
 -   React Query
+-   CSS variables for theme styling
+-   prefers-color-scheme support
 
 Infrastructure
 
@@ -141,6 +163,8 @@ The .env file is not included in the repository.
 
 Example:
 
+OPENWEATHER_BASE_URL=https://api.openweathermap.org/data/2.5
+
 OPENWEATHER_API_KEY=your_api_key
 
 ------------------------------------------------------------------------
@@ -202,6 +226,7 @@ Possible improvements:
 -   User authentication
 -   Database storage for favorites
 -   Weather API caching
+-   Liquid glass inspired UI styling
 -   Docker containerization
 -   CI/CD pipeline
 
