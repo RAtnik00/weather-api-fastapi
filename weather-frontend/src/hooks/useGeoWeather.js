@@ -87,7 +87,6 @@ export function useGeoWeather(selectedCity) {
     const [useGeoWeatherMode, setUseGeoWeatherMode] = useState(
         shouldUseStoredGeolocation
     );
-    const [geoResolved, setGeoResolved] = useState(shouldUseStoredGeolocation);
 
     const didTryGeolocationRef = useRef(false);
 
@@ -102,8 +101,6 @@ export function useGeoWeather(selectedCity) {
         didTryGeolocationRef.current = true;
 
         if (!isGeolocationSupported()) {
-            setUseGeoWeatherMode(false);
-            setGeoResolved(true);
             return;
         }
 
@@ -117,7 +114,6 @@ export function useGeoWeather(selectedCity) {
                 setPendingCoords(nextCoords);
                 setCoords(nextCoords);
                 setUseGeoWeatherMode(true);
-                setGeoResolved(true);
 
                 if (geoCacheConsent === "accepted") {
                     localStorage.setItem(
@@ -136,7 +132,6 @@ export function useGeoWeather(selectedCity) {
                 }
 
                 setUseGeoWeatherMode(false);
-                setGeoResolved(true);
             },
             {
                 enableHighAccuracy: false,
@@ -186,16 +181,13 @@ export function useGeoWeather(selectedCity) {
     }
 
     const mustAnswerConsent =
-        geoResolved &&
-        pendingCoords &&
-        geoCacheConsent === DEFAULT_COOKIE_CONSENT;
+        pendingCoords && geoCacheConsent === DEFAULT_COOKIE_CONSENT;
 
     const activeCity = currentQ.data?.city || selectedCity || DEFAULT_CITY;
 
     return {
         currentQ,
         forecastQ,
-        geoResolved,
         mustAnswerConsent,
         activeCity,
         selectCityMode,
