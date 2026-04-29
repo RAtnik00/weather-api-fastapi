@@ -16,18 +16,38 @@ import { DEFAULT_CITY } from "./constants/weather";
 import "./App.css";
 
 const THEME_STORAGE_KEY = "weather_theme";
+const SYSTEM_LIGHT_THEME_QUERY = "(prefers-color-scheme: light)";
 
-function normalizeTheme(value) {
-    return value === "soft" || value === "light" ? "light" : "dark";
+function normalizeThemePreference(value) {
+    if (value === "soft") {
+        return "light";
+    }
+
+    if (value === "system" || value === "dark" || value === "light") {
+        return value;
+    }
+
+    return "system";
 }
 
 function applyTheme(nextTheme) {
     document.documentElement.dataset.theme = nextTheme;
-    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
 }
 
-function getInitialTheme() {
-    return normalizeTheme(localStorage.getItem(THEME_STORAGE_KEY));
+function getSystemTheme() {
+    if (typeof window === "undefined" || !window.matchMedia) {
+        return "dark";
+    }
+
+    return window.matchMedia(SYSTEM_LIGHT_THEME_QUERY).matches ? "light" : "dark";
+}
+
+function resolveTheme(themePreference, systemTheme) {
+    return themePreference === "system" ? systemTheme : themePreference;
+}
+
+function getInitialThemePreference() {
+    return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
 }
 
 function renderConsentModal({ onAccept, onDecline }) {
@@ -53,9 +73,11 @@ function renderConsentModal({ onAccept, onDecline }) {
 }
 
 export default function App() {
-    const [theme, setTheme] = useState(getInitialTheme);
+    const [themePreference, setThemePreference] = useState(getInitialThemePreference);
+    const [systemTheme, setSystemTheme] = useState(getSystemTheme);
     const [input, setInput] = useState(DEFAULT_CITY);
     const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
+    const theme = resolveTheme(themePreference, systemTheme);
 
     const {
         currentQ,
@@ -80,6 +102,24 @@ export default function App() {
     }, [theme]);
 
     useEffect(() => {
+        localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+    }, [themePreference]);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia(SYSTEM_LIGHT_THEME_QUERY);
+
+        function handleSystemThemeChange(event) {
+            setSystemTheme(event.matches ? "light" : "dark");
+        }
+
+        mediaQuery.addEventListener("change", handleSystemThemeChange);
+
+        return () => {
+            mediaQuery.removeEventListener("change", handleSystemThemeChange);
+        };
+    }, []);
+
+    useEffect(() => {
         const resolvedCity = currentQ.data?.city;
         if (!resolvedCity) return;
         if (lastHistorySyncCityRef.current === resolvedCity) return;
@@ -88,12 +128,8 @@ export default function App() {
         historyQ.refetch();
     }, [currentQ.data?.city, historyQ]);
 
-    function handleToggleTheme() {
-        setTheme((currentTheme) => {
-            const nextTheme = currentTheme === "dark" ? "light" : "dark";
-            applyTheme(nextTheme);
-            return nextTheme;
-        });
+    function handleThemePreferenceChange(nextPreference) {
+        setThemePreference(nextPreference);
     }
 
     function handleSearch(nextCityOverride) {
@@ -156,13 +192,27 @@ export default function App() {
                     </div>
 
                     <div className="topbarActions">
-                        <button
+                        <div
                             className="themeToggle"
-                            type="button"
-                            onClick={handleToggleTheme}
+                            data-active={themePreference}
+                            aria-label="Theme"
                         >
-                            {theme === "dark" ? "Light" : "Dark"}
-                        </button>
+                            {["system", "dark", "light"].map((option) => (
+                                <button
+                                    className={
+                                        option === themePreference ? "active" : ""
+                                    }
+                                    key={option}
+                                    type="button"
+                                    aria-pressed={option === themePreference}
+                                    onClick={() =>
+                                        handleThemePreferenceChange(option)
+                                    }
+                                >
+                                    {option}
+                                </button>
+                            ))}
+                        </div>
 
                         <SearchBar
                             input={input}
