@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
     useAddFavorite,
     useFavorites,
@@ -27,9 +27,7 @@ function applyTheme(nextTheme) {
 }
 
 function getInitialTheme() {
-    const initialTheme = normalizeTheme(localStorage.getItem(THEME_STORAGE_KEY));
-    applyTheme(initialTheme);
-    return initialTheme;
+    return normalizeTheme(localStorage.getItem(THEME_STORAGE_KEY));
 }
 
 function renderConsentModal({ onAccept, onDecline }) {
@@ -77,9 +75,8 @@ export default function App() {
 
     const lastHistorySyncCityRef = useRef(null);
 
-    useEffect(() => {
-        document.documentElement.dataset.theme = theme;
-        localStorage.setItem(THEME_STORAGE_KEY, theme);
+    useLayoutEffect(() => {
+        applyTheme(theme);
     }, [theme]);
 
     useEffect(() => {

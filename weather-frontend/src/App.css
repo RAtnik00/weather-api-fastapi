@@ -1,7 +1,10 @@
 :root {
   color-scheme: dark;
 
-  --page-bg: radial-gradient(1200px 800px at 20% 10%, #14213d 0%, #0b1220 45%, #070b14 100%);
+  --page-bg-dark: radial-gradient(1200px 800px at 20% 10%, #14213d 0%, #0b1220 45%, #070b14 100%);
+  --page-bg-light: radial-gradient(1200px 800px at 20% 10%, #d9edff 0%, #b8d6f1 45%, #8fb5d8 100%);
+  --page-bg: var(--page-bg-dark);
+  --theme-transition: 480ms cubic-bezier(0.22, 1, 0.36, 1);
   --text-main: white;
   --text-muted: rgba(255, 255, 255, 0.6);
   --text-soft: rgba(255, 255, 255, 0.72);
@@ -25,7 +28,7 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --page-bg: radial-gradient(1200px 800px at 20% 10%, #d9edff 0%, #b8d6f1 45%, #8fb5d8 100%);
+  --page-bg: var(--page-bg-light);
   --text-main: #0f223d;
   --text-muted: rgba(15, 34, 61, 0.66);
   --text-soft: rgba(15, 34, 61, 0.74);
@@ -48,15 +51,68 @@
 
 .page {
   min-height: 100vh;
-  background: var(--page-bg);
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+  background: var(--page-bg-dark);
   color: var(--text-main);
+  transition: color var(--theme-transition);
 }
 
+.page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--page-bg-light);
+  opacity: 0;
+  transition: opacity var(--theme-transition);
+}
+
+:root[data-theme="light"] .page::before {
+  opacity: 1;
+}
 
 .shell {
+  position: relative;
+  z-index: 1;
   width: 100%;
   padding: 24px 40px 40px;
   box-sizing: border-box;
+}
+
+.topbar,
+.card,
+.themeToggle,
+.searchInput,
+.searchBtn,
+.stat,
+.ghostBtn,
+.listBtn,
+.dangerBtn,
+.consentOverlay,
+.consentModal,
+.consentActions button,
+.suggestionsDropdown,
+.suggestionItem,
+.sub,
+.cardTitle,
+.desc,
+.meta,
+.statLabel,
+.ftHead,
+.ftRow,
+.muted,
+.error,
+.suggestionMeta,
+.suggestionEmpty {
+  transition:
+    color var(--theme-transition),
+    background-color var(--theme-transition),
+    border-color var(--theme-transition),
+    box-shadow var(--theme-transition),
+    opacity var(--theme-transition);
 }
 
 .topbar {
@@ -80,13 +136,13 @@
   padding: 12px 16px;
   border-radius: 14px;
   border: 1px solid var(--card-border);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   color: var(--text-main);
   cursor: pointer;
 }
 
 .themeToggle:hover {
-  background: var(--control-hover-bg);
+  background-color: var(--control-hover-bg);
 }
 
 .h1 {
@@ -111,7 +167,7 @@
   padding: 12px 14px;
   border-radius: 14px;
   border: 1px solid var(--card-border);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   color: var(--text-main);
   outline: none;
 }
@@ -124,13 +180,13 @@
   padding: 12px 16px;
   border-radius: 14px;
   border: 1px solid var(--card-border);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   color: var(--text-main);
   cursor: pointer;
 }
 
 .searchBtn:hover {
-  background: var(--control-hover-bg);
+  background-color: var(--control-hover-bg);
 }
 
 .grid {
@@ -152,7 +208,7 @@
 .card {
   border-radius: 20px;
   border: 1px solid var(--card-border);
-  background: var(--card-bg);
+  background-color: var(--card-bg);
   padding: 16px;
   box-shadow: 0 10px 30px var(--shadow);
 }
@@ -205,7 +261,7 @@
 .stat {
   border-radius: 16px;
   border: 1px solid var(--line);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   padding: 12px;
 }
 
@@ -229,13 +285,13 @@
   padding: 10px 12px;
   border-radius: 14px;
   border: 1px solid var(--card-border);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   color: var(--text-main);
   cursor: pointer;
 }
 
 .ghostBtn:hover {
-  background: var(--control-hover-bg);
+  background-color: var(--control-hover-bg);
 }
 
 .forecastTable {
@@ -297,13 +353,13 @@
   padding: 12px 14px;
   border-radius: 14px;
   border: 1px solid var(--card-border);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   color: var(--text-main);
   cursor: pointer;
 }
 
 .listBtn:hover {
-  background: var(--control-hover-bg);
+  background-color: var(--control-hover-bg);
 }
 
 .favoriteRow {
@@ -316,13 +372,13 @@
   padding: 10px 12px;
   border-radius: 14px;
   border: 1px solid var(--danger-border);
-  background: var(--danger-bg);
+  background-color: var(--danger-bg);
   color: var(--text-main);
   cursor: pointer;
 }
 
 .dangerBtn:hover {
-  background: var(--danger-hover-bg);
+  background-color: var(--danger-hover-bg);
 }
 
 .dangerBtn:disabled,
@@ -400,7 +456,7 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: var(--overlay-bg);
+  background-color: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -411,7 +467,7 @@
 .consentModal {
   width: 100%;
   max-width: 520px;
-  background: var(--modal-bg);
+  background-color: var(--modal-bg);
   border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 24px;
@@ -440,7 +496,7 @@
   padding: 12px 18px;
   border-radius: 14px;
   border: 1px solid var(--card-border);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   color: var(--text-main);
   font-weight: 600;
   cursor: pointer;
@@ -448,16 +504,16 @@
 }
 
 .consentActions button:hover {
-  background: var(--control-hover-bg);
+  background-color: var(--control-hover-bg);
 }
 
 .consentActions button:first-child {
-  background: #3b82f6;
+  background-color: #3b82f6;
   border-color: #3b82f6;
 }
 
 .consentActions button:first-child:hover {
-  background: #2563eb;
+  background-color: #2563eb;
 }
 
 .searchWrap {
@@ -474,7 +530,7 @@
   z-index: 30;
   border-radius: 16px;
   border: 1px solid var(--card-border);
-  background: var(--dropdown-bg);
+  background-color: var(--dropdown-bg);
   backdrop-filter: blur(10px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
   overflow: hidden;
@@ -490,7 +546,7 @@
   border: none;
   border-bottom: 1px solid var(--line-subtle);
   border-radius: 0;
-  background: transparent;
+  background-color: transparent;
   color: var(--text-main);
   text-align: left;
 }
@@ -501,7 +557,39 @@
 
 .suggestionItem:hover,
 .suggestionItem.active {
-  background: var(--control-hover-bg);
+  background-color: var(--control-hover-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .page::before,
+  .topbar,
+  .card,
+  .themeToggle,
+  .searchInput,
+  .searchBtn,
+  .stat,
+  .ghostBtn,
+  .listBtn,
+  .dangerBtn,
+  .consentOverlay,
+  .consentModal,
+  .consentActions button,
+  .suggestionsDropdown,
+  .suggestionItem,
+  .sub,
+  .cardTitle,
+  .desc,
+  .meta,
+  .statLabel,
+  .ftHead,
+  .ftRow,
+  .muted,
+  .error,
+  .suggestionMeta,
+  .suggestionEmpty {
+    transition: none;
+  }
 }
 
 .suggestionMain {
