@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
     useAddFavorite,
     useFavorites,
@@ -14,6 +14,41 @@ import FavoritesCard from "./features/weather/components/FavoritesCard";
 import QuickActionsCard from "./features/weather/components/QuickActionsCard";
 import { DEFAULT_CITY } from "./constants/weather";
 import "./App.css";
+
+const THEME_STORAGE_KEY = "weather_theme";
+const SYSTEM_LIGHT_THEME_QUERY = "(prefers-color-scheme: light)";
+
+function normalizeThemePreference(value) {
+    if (value === "soft") {
+        return "light";
+    }
+
+    if (value === "system" || value === "dark" || value === "light") {
+        return value;
+    }
+
+    return "system";
+}
+
+function applyTheme(nextTheme) {
+    document.documentElement.dataset.theme = nextTheme;
+}
+
+function getSystemTheme() {
+    if (typeof window === "undefined" || !window.matchMedia) {
+        return "dark";
+    }
+
+    return window.matchMedia(SYSTEM_LIGHT_THEME_QUERY).matches ? "light" : "dark";
+}
+
+function resolveTheme(themePreference, systemTheme) {
+    return themePreference === "system" ? systemTheme : themePreference;
+}
+
+function getInitialThemePreference() {
+    return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
+}
 
 function renderConsentModal({ onAccept, onDecline }) {
     return (
@@ -38,8 +73,11 @@ function renderConsentModal({ onAccept, onDecline }) {
 }
 
 export default function App() {
+    const [themePreference, setThemePreference] = useState(getInitialThemePreference);
+    const [systemTheme, setSystemTheme] = useState(getSystemTheme);
     const [input, setInput] = useState(DEFAULT_CITY);
     const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
+    const theme = resolveTheme(themePreference, systemTheme);
 
     const {
         currentQ,
@@ -59,6 +97,28 @@ export default function App() {
 
     const lastHistorySyncCityRef = useRef(null);
 
+    useLayoutEffect(() => {
+        applyTheme(theme);
+    }, [theme]);
+
+    useEffect(() => {
+        localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+    }, [themePreference]);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia(SYSTEM_LIGHT_THEME_QUERY);
+
+        function handleSystemThemeChange(event) {
+            setSystemTheme(event.matches ? "light" : "dark");
+        }
+
+        mediaQuery.addEventListener("change", handleSystemThemeChange);
+
+        return () => {
+            mediaQuery.removeEventListener("change", handleSystemThemeChange);
+        };
+    }, []);
+
     useEffect(() => {
         const resolvedCity = currentQ.data?.city;
         if (!resolvedCity) return;
@@ -67,6 +127,10 @@ export default function App() {
         lastHistorySyncCityRef.current = resolvedCity;
         historyQ.refetch();
     }, [currentQ.data?.city, historyQ]);
+
+    function handleThemePreferenceChange(nextPreference) {
+        setThemePreference(nextPreference);
+    }
 
     function handleSearch(nextCityOverride) {
         const nextCity = (nextCityOverride ?? input).trim();
@@ -127,11 +191,35 @@ export default function App() {
                         <div className="sub">Desktop dashboard</div>
                     </div>
 
-                    <SearchBar
-                        input={input}
-                        setInput={setInput}
-                        onSearch={handleSearch}
-                    />
+                    <div className="topbarActions">
+                        <div
+                            className="themeToggle"
+                            data-active={themePreference}
+                            aria-label="Theme"
+                        >
+                            {["system", "dark", "light"].map((option) => (
+                                <button
+                                    className={
+                                        option === themePreference ? "active" : ""
+                                    }
+                                    key={option}
+                                    type="button"
+                                    aria-pressed={option === themePreference}
+                                    onClick={() =>
+                                        handleThemePreferenceChange(option)
+                                    }
+                                >
+                                    {option}
+                                </button>
+                            ))}
+                        </div>
+
+                        <SearchBar
+                            input={input}
+                            setInput={setInput}
+                            onSearch={handleSearch}
+                        />
+                    </div>
                 </header>
 
                 <main className="grid">

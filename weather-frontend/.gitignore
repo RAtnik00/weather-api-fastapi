@@ -25,6 +25,8 @@ dist-ssr
 
 # Python cache
 __pycache__/
-*.pyc
+**/__pycache__/
+*.py[cod]
+*$py.class
 
 .env.production
