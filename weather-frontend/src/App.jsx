@@ -15,6 +15,23 @@ import QuickActionsCard from "./features/weather/components/QuickActionsCard";
 import { DEFAULT_CITY } from "./constants/weather";
 import "./App.css";
 
+const THEME_STORAGE_KEY = "weather_theme";
+
+function normalizeTheme(value) {
+    return value === "soft" || value === "light" ? "light" : "dark";
+}
+
+function applyTheme(nextTheme) {
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+}
+
+function getInitialTheme() {
+    const initialTheme = normalizeTheme(localStorage.getItem(THEME_STORAGE_KEY));
+    applyTheme(initialTheme);
+    return initialTheme;
+}
+
 function renderConsentModal({ onAccept, onDecline }) {
     return (
         <div className="consentOverlay">
@@ -38,6 +55,7 @@ function renderConsentModal({ onAccept, onDecline }) {
 }
 
 export default function App() {
+    const [theme, setTheme] = useState(getInitialTheme);
     const [input, setInput] = useState(DEFAULT_CITY);
     const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
 
@@ -60,6 +78,11 @@ export default function App() {
     const lastHistorySyncCityRef = useRef(null);
 
     useEffect(() => {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }, [theme]);
+
+    useEffect(() => {
         const resolvedCity = currentQ.data?.city;
         if (!resolvedCity) return;
         if (lastHistorySyncCityRef.current === resolvedCity) return;
@@ -67,6 +90,14 @@ export default function App() {
         lastHistorySyncCityRef.current = resolvedCity;
         historyQ.refetch();
     }, [currentQ.data?.city, historyQ]);
+
+    function handleToggleTheme() {
+        setTheme((currentTheme) => {
+            const nextTheme = currentTheme === "dark" ? "light" : "dark";
+            applyTheme(nextTheme);
+            return nextTheme;
+        });
+    }
 
     function handleSearch(nextCityOverride) {
         const nextCity = (nextCityOverride ?? input).trim();
@@ -127,11 +158,21 @@ export default function App() {
                         <div className="sub">Desktop dashboard</div>
                     </div>
 
-                    <SearchBar
-                        input={input}
-                        setInput={setInput}
-                        onSearch={handleSearch}
-                    />
+                    <div className="topbarActions">
+                        <button
+                            className="themeToggle"
+                            type="button"
+                            onClick={handleToggleTheme}
+                        >
+                            {theme === "dark" ? "Light" : "Dark"}
+                        </button>
+
+                        <SearchBar
+                            input={input}
+                            setInput={setInput}
+                            onSearch={handleSearch}
+                        />
+                    </div>
                 </header>
 
                 <main className="grid">
