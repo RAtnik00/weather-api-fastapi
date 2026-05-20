@@ -32,6 +32,10 @@ export default function CurrentWeatherCard({ currentQ }) {
 
     return (
         <Card title="Current">
+            {currentQ.isFetching && (
+                <div className="refreshStatus">Updating current weather...</div>
+            )}
+
             <div className="city">{weather.city}</div>
             <div className="desc">{weather.condition}</div>
 

@@ -37,6 +37,10 @@ export default function ForecastCard({ forecastQ }) {
 
     return (
         <Card title="5-day forecast">
+            {forecastQ.isFetching && (
+                <div className="refreshStatus">Updating forecast...</div>
+            )}
+
             <div className="forecastTable">
                 <div className="ftHead">
                     <div>Date</div>

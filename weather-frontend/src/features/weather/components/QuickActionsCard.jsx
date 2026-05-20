@@ -1,11 +1,12 @@
 import Card from "../../../components/Card.jsx";
 
 export default function QuickActionsCard({
-                                             city,
-                                             onAddFavorite,
-                                             onRefresh,
-                                             isAddingFavorite,
-                                         }) {
+    city,
+    onAddFavorite,
+    onRefresh,
+    isAddingFavorite,
+    isRefreshing,
+}) {
     const cannotAddFavorite = !city || isAddingFavorite;
 
     function handleAddFavorite() {
@@ -29,8 +30,9 @@ export default function QuickActionsCard({
                     className="ghostBtn"
                     type="button"
                     onClick={onRefresh}
+                    disabled={isRefreshing}
                 >
-                    ⟳ Refresh
+                    {isRefreshing ? "Refreshing..." : "⟳ Refresh"}
                 </button>
             </div>
         </Card>
