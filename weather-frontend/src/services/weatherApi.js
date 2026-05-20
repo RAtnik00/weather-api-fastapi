@@ -124,9 +124,7 @@ export async function fetchCurrentWeather(city) {
         params: { location: city },
     });
 
-    const mapped = mapCurrentWeather(data);
-    pushHistory(mapped.city);
-    return mapped;
+    return mapCurrentWeather(data);
 }
 
 export async function fetchCurrentWeatherByCoords(lat, lon) {
@@ -134,9 +132,7 @@ export async function fetchCurrentWeatherByCoords(lat, lon) {
         params: { lat, lon },
     });
 
-    const mapped = mapCurrentWeather(data);
-    pushHistory(mapped.city);
-    return mapped;
+    return mapCurrentWeather(data);
 }
 
 export async function fetchForecast(city) {
@@ -157,6 +153,15 @@ export async function fetchForecastByCoords(lat, lon) {
 
 export async function fetchHistory() {
     return getHistoryList();
+}
+
+export async function addHistory(city) {
+    return pushHistory(city);
+}
+
+export async function clearHistory() {
+    saveHistoryList([]);
+    return [];
 }
 
 export async function fetchFavorites() {

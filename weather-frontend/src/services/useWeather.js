@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     addFavorite,
+    addHistory,
+    clearHistory,
     fetchCitySuggestions,
     fetchCurrentWeather,
     fetchCurrentWeatherByCoords,
@@ -40,6 +42,19 @@ function useFavoritesMutation(mutationFn) {
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: WEATHER_QUERY_KEYS.favorites(),
+            });
+        },
+    });
+}
+
+function useHistoryMutation(mutationFn) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: WEATHER_QUERY_KEYS.history(),
             });
         },
     });
@@ -107,6 +122,14 @@ export function useAddFavorite() {
 
 export function useRemoveFavorite() {
     return useFavoritesMutation(removeFavorite);
+}
+
+export function useAddHistory() {
+    return useHistoryMutation(addHistory);
+}
+
+export function useClearHistory() {
+    return useHistoryMutation(clearHistory);
 }
 
 export function useCitySuggestions(query) {
