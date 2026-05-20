@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
     useAddFavorite,
+    useAddHistory,
+    useClearHistory,
     useFavorites,
     useHistory,
     useRemoveFavorite,
@@ -50,6 +52,10 @@ function getInitialThemePreference() {
     return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
 }
 
+function isSameCity(firstCity, secondCity) {
+    return firstCity?.trim().toLowerCase() === secondCity?.trim().toLowerCase();
+}
+
 function renderConsentModal({ onAccept, onDecline }) {
     return (
         <div className="consentOverlay">
@@ -91,11 +97,18 @@ export default function App() {
 
     const historyQ = useHistory();
     const favoritesQ = useFavorites();
+    const isRefreshing =
+        currentQ.isFetching ||
+        forecastQ.isFetching ||
+        historyQ.isFetching ||
+        favoritesQ.isFetching;
 
     const addFavoriteM = useAddFavorite();
     const removeFavoriteM = useRemoveFavorite();
+    const addHistoryM = useAddHistory();
+    const clearHistoryM = useClearHistory();
 
-    const lastHistorySyncCityRef = useRef(null);
+    const pendingHistoryCityRef = useRef(null);
 
     useLayoutEffect(() => {
         applyTheme(theme);
@@ -121,12 +134,19 @@ export default function App() {
 
     useEffect(() => {
         const resolvedCity = currentQ.data?.city;
-        if (!resolvedCity) return;
-        if (lastHistorySyncCityRef.current === resolvedCity) return;
+        const pendingCity = pendingHistoryCityRef.current;
 
-        lastHistorySyncCityRef.current = resolvedCity;
-        historyQ.refetch();
-    }, [currentQ.data?.city, historyQ]);
+        if (currentQ.isError) {
+            pendingHistoryCityRef.current = null;
+            return;
+        }
+
+        if (!resolvedCity) return;
+        if (!pendingCity) return;
+
+        pendingHistoryCityRef.current = null;
+        addHistoryM.mutate(resolvedCity);
+    }, [addHistoryM, currentQ.data?.city, currentQ.isError]);
 
     function handleThemePreferenceChange(nextPreference) {
         setThemePreference(nextPreference);
@@ -136,11 +156,25 @@ export default function App() {
         const nextCity = (nextCityOverride ?? input).trim();
         if (!nextCity) return;
 
+        if (isSameCity(currentQ.data?.city, nextCity)) {
+            addHistoryM.mutate(currentQ.data.city);
+            pendingHistoryCityRef.current = null;
+        } else {
+            pendingHistoryCityRef.current = nextCity;
+        }
+
         selectCityMode();
         setSelectedCity(nextCity);
     }
 
     function handleSelectCity(nextCity) {
+        if (isSameCity(currentQ.data?.city, nextCity)) {
+            addHistoryM.mutate(currentQ.data.city);
+            pendingHistoryCityRef.current = null;
+        } else {
+            pendingHistoryCityRef.current = nextCity;
+        }
+
         setInput(nextCity);
         selectCityMode();
         setSelectedCity(nextCity);
@@ -155,6 +189,11 @@ export default function App() {
 
     function handleRemoveFavorite(targetCity) {
         removeFavoriteM.mutate(targetCity);
+    }
+
+    function handleClearHistory() {
+        pendingHistoryCityRef.current = null;
+        clearHistoryM.mutate();
     }
 
     function handleRefresh() {
@@ -231,6 +270,7 @@ export default function App() {
                             onAddFavorite={handleAddFavorite}
                             onRefresh={handleRefresh}
                             isAddingFavorite={addFavoriteM.isPending}
+                            isRefreshing={isRefreshing}
                         />
                     </section>
 
@@ -241,6 +281,8 @@ export default function App() {
                             <HistoryCard
                                 historyQ={historyQ}
                                 onSelectCity={handleSelectCity}
+                                onClearHistory={handleClearHistory}
+                                isClearingHistory={clearHistoryM.isPending}
                             />
 
                             <FavoritesCard
