@@ -520,9 +520,34 @@
 
   .ftHead,
   .ftRow {
-    grid-template-columns: 100px 60px 60px 70px 1fr;
-    gap: 8px;
-    font-size: 12px;
+    grid-template-columns: 1fr;
+  }
+
+  .ftHead {
+    display: none;
+  }
+
+  .ftRow {
+    grid-template-columns: 1fr auto auto;
+    gap: 6px 12px;
+    align-items: start;
+    padding: 12px;
+    border: 1px solid var(--line-subtle);
+    border-radius: 14px;
+    background-color: var(--control-bg);
+  }
+
+  .ftRow > :nth-child(4) {
+    grid-column: 2 / 4;
+    text-align: right;
+  }
+
+  .ftRow > :nth-child(5) {
+    grid-column: 1 / 4;
+  }
+
+  .ftDate {
+    grid-row: span 2;
   }
 }
 .consentOverlay {
