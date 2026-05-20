@@ -283,6 +283,12 @@
   color: var(--text-main);
 }
 
+.refreshStatus {
+  margin-bottom: 10px;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
 .city {
   font-size: 22px;
   font-weight: 700;
@@ -409,6 +415,15 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.clearHistoryBtn {
+  width: auto;
+  padding: 7px 10px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .listBtn {
