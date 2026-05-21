@@ -5,6 +5,7 @@
   --page-bg-light: radial-gradient(1200px 800px at 20% 10%, #d9edff 0%, #b8d6f1 45%, #8fb5d8 100%);
   --page-bg: var(--page-bg-dark);
   --theme-transition: 480ms cubic-bezier(0.22, 1, 0.36, 1);
+  --glass-transition: 360ms cubic-bezier(0.22, 1, 0.36, 1);
   --text-main: white;
   --text-muted: rgba(255, 255, 255, 0.6);
   --text-soft: rgba(255, 255, 255, 0.72);
@@ -53,6 +54,101 @@
   --shadow: rgba(15, 34, 61, 0.14);
 }
 
+:root[data-glass="liquid"] {
+  --glass-card-bg: rgba(255, 255, 255, 0.1);
+  --glass-card-border: rgba(255, 255, 255, 0.24);
+  --glass-control-bg: rgba(255, 255, 255, 0.12);
+  --glass-control-hover-bg: rgba(255, 255, 255, 0.18);
+  --glass-shadow: rgba(0, 0, 0, 0.24);
+}
+
+:root[data-theme="light"][data-glass="liquid"] {
+  --glass-card-bg: rgba(240, 248, 255, 0.46);
+  --glass-card-border: rgba(255, 255, 255, 0.58);
+  --glass-control-bg: rgba(255, 255, 255, 0.48);
+  --glass-control-hover-bg: rgba(255, 255, 255, 0.64);
+  --glass-shadow: rgba(47, 91, 132, 0.18);
+}
+
+:root[data-glass="liquid"] .topbar {
+  border-bottom-color: var(--glass-card-border);
+}
+
+:root[data-glass="liquid"] .card,
+:root[data-glass="liquid"] .searchInput,
+:root[data-glass="liquid"] .searchBtn,
+:root[data-glass="liquid"] .themeToggle,
+:root[data-glass="liquid"] .glassToggle,
+:root[data-glass="liquid"] .stat,
+:root[data-glass="liquid"] .ghostBtn,
+:root[data-glass="liquid"] .listBtn,
+:root[data-glass="liquid"] .dangerBtn,
+:root[data-glass="liquid"] .suggestionsDropdown,
+:root[data-glass="liquid"] .suggestionItem,
+:root[data-glass="liquid"] .consentModal,
+:root[data-glass="liquid"] .consentActions button {
+  background-color: var(--glass-card-bg);
+  border-color: var(--glass-card-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 18px 44px var(--glass-shadow);
+  backdrop-filter: blur(22px) saturate(1.45);
+  -webkit-backdrop-filter: blur(22px) saturate(1.45);
+}
+
+:root[data-glass="liquid"] .searchInput,
+:root[data-glass="liquid"] .searchBtn,
+:root[data-glass="liquid"] .themeToggle,
+:root[data-glass="liquid"] .glassToggle,
+:root[data-glass="liquid"] .stat,
+:root[data-glass="liquid"] .ghostBtn,
+:root[data-glass="liquid"] .listBtn,
+:root[data-glass="liquid"] .suggestionItem,
+:root[data-glass="liquid"] .consentActions button {
+  background-color: var(--glass-control-bg);
+}
+
+:root[data-glass="liquid"] .searchBtn:hover,
+:root[data-glass="liquid"] .glassToggle:hover,
+:root[data-glass="liquid"] .ghostBtn:hover,
+:root[data-glass="liquid"] .listBtn:hover,
+:root[data-glass="liquid"] .suggestionItem:hover,
+:root[data-glass="liquid"] .suggestionItem.active,
+:root[data-glass="liquid"] .consentActions button:hover {
+  background-color: var(--glass-control-hover-bg);
+}
+
+:root[data-glass="liquid"] .ftRow {
+  background-color: var(--glass-control-bg);
+  box-shadow:
+    inset 0 0 0 1px var(--glass-card-border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 28px var(--glass-shadow);
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-glass="liquid"] .card,
+  :root[data-glass="liquid"] .searchInput,
+  :root[data-glass="liquid"] .searchBtn,
+  :root[data-glass="liquid"] .themeToggle,
+  :root[data-glass="liquid"] .glassToggle,
+  :root[data-glass="liquid"] .stat,
+  :root[data-glass="liquid"] .ghostBtn,
+  :root[data-glass="liquid"] .listBtn,
+  :root[data-glass="liquid"] .dangerBtn,
+  :root[data-glass="liquid"] .suggestionsDropdown,
+  :root[data-glass="liquid"] .suggestionItem,
+  :root[data-glass="liquid"] .consentModal,
+  :root[data-glass="liquid"] .consentActions button,
+  :root[data-glass="liquid"] .ftRow {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: var(--card-bg);
+  }
+}
+
 .page {
   min-height: 100vh;
   position: relative;
@@ -89,6 +185,7 @@
 .topbar,
 .card,
 .themeToggle,
+.glassToggle,
 .themeIcon,
 .searchInput,
 .searchBtn,
@@ -116,8 +213,33 @@
     color var(--theme-transition),
     background-color var(--theme-transition),
     border-color var(--theme-transition),
+    border-radius var(--theme-transition),
     box-shadow var(--theme-transition),
     opacity var(--theme-transition);
+}
+
+:root[data-glass] .card,
+:root[data-glass] .searchInput,
+:root[data-glass] .searchBtn,
+:root[data-glass] .themeToggle,
+:root[data-glass] .glassToggle,
+:root[data-glass] .stat,
+:root[data-glass] .ghostBtn,
+:root[data-glass] .listBtn,
+:root[data-glass] .dangerBtn,
+:root[data-glass] .suggestionsDropdown,
+:root[data-glass] .suggestionItem,
+:root[data-glass] .consentModal,
+:root[data-glass] .consentActions button,
+:root[data-glass] .ftRow {
+  transition:
+    color var(--theme-transition),
+    background-color var(--glass-transition),
+    border-color var(--glass-transition),
+    border-radius var(--glass-transition),
+    box-shadow var(--glass-transition),
+    opacity var(--glass-transition),
+    transform 180ms ease;
 }
 
 .topbar {
@@ -135,6 +257,42 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+}
+
+.searchBtn,
+.ghostBtn,
+.listBtn,
+.dangerBtn,
+.suggestionItem,
+.consentActions button {
+  transform: translateY(0) scale(1);
+  transition:
+    color var(--theme-transition),
+    background-color var(--glass-transition),
+    border-color var(--glass-transition),
+    border-radius var(--glass-transition),
+    box-shadow var(--glass-transition),
+    opacity var(--glass-transition),
+    transform 180ms ease;
+}
+
+.searchBtn:hover,
+.ghostBtn:hover,
+.listBtn:hover,
+.dangerBtn:hover,
+.suggestionItem:hover,
+.suggestionItem.active,
+.consentActions button:hover {
+  transform: translateY(-1px);
+}
+
+.searchBtn:active,
+.ghostBtn:active,
+.listBtn:active,
+.dangerBtn:active,
+.suggestionItem:active,
+.consentActions button:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .themeToggle {
@@ -198,6 +356,60 @@
 .themeToggle:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
+}
+
+.glassToggle {
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  background-color: var(--control-bg);
+  color: var(--text-main);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0;
+  transition:
+    color var(--theme-transition),
+    background-color var(--theme-transition),
+    border-color var(--theme-transition),
+    box-shadow var(--theme-transition),
+    transform 180ms ease;
+}
+
+.glassToggle:hover {
+  background-color: var(--control-hover-bg);
+  transform: translateY(-1px);
+}
+
+.glassToggle:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.glassToggle:focus {
+  outline: none;
+}
+
+.glassToggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.glassToggle[data-active="true"] {
+  background-color: rgba(147, 197, 253, 0.18);
+  border-color: rgba(147, 197, 253, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 28px rgba(37, 99, 235, 0.14);
+}
+
+:root[data-glass="liquid"] .glassToggle[data-active="true"] {
+  background-color: rgba(147, 197, 253, 0.24);
+  border-color: rgba(191, 219, 254, 0.54);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 16px 34px rgba(37, 99, 235, 0.22);
 }
 
 .themeIcon {
@@ -483,6 +695,8 @@
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid var(--line-subtle);
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .ftRow:last-child {
@@ -560,6 +774,7 @@
 .ghostBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 @media (max-width: 1100px) {
@@ -710,7 +925,6 @@
   color: var(--text-main);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .consentActions button:hover {
@@ -776,6 +990,7 @@
   .topbar,
   .card,
   .themeToggle,
+  .glassToggle,
   .themeToggle::before,
   .themeIcon,
   .themeIcon::before,
@@ -803,6 +1018,26 @@
   .suggestionMeta,
   .suggestionEmpty {
     transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-glass="liquid"] .card,
+  :root[data-glass="liquid"] .searchInput,
+  :root[data-glass="liquid"] .searchBtn,
+  :root[data-glass="liquid"] .themeToggle,
+  :root[data-glass="liquid"] .glassToggle,
+  :root[data-glass="liquid"] .stat,
+  :root[data-glass="liquid"] .ghostBtn,
+  :root[data-glass="liquid"] .listBtn,
+  :root[data-glass="liquid"] .dangerBtn,
+  :root[data-glass="liquid"] .suggestionsDropdown,
+  :root[data-glass="liquid"] .suggestionItem,
+  :root[data-glass="liquid"] .consentModal,
+  :root[data-glass="liquid"] .consentActions button,
+  :root[data-glass="liquid"] .ftRow {
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
   }
 }
 
@@ -843,6 +1078,11 @@
     --toggle-size: 44px;
     align-self: auto;
     flex: 0 0 var(--toggle-size);
+  }
+
+  .glassToggle {
+    height: 44px;
+    flex: 0 0 auto;
   }
 
   .card {
