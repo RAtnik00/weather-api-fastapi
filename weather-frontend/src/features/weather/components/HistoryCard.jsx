@@ -32,16 +32,19 @@ export default function HistoryCard({
     }
 
     return (
-        <Card title="History">
-            <button
-                className="ghostBtn clearHistoryBtn"
-                type="button"
-                onClick={onClearHistory}
-                disabled={isClearingHistory || !hasHistory}
-            >
-                Clear history
-            </button>
-
+        <Card
+            title="History"
+            action={
+                <button
+                    className="ghostBtn clearAllBtn"
+                    type="button"
+                    onClick={onClearHistory}
+                    disabled={isClearingHistory || !hasHistory}
+                >
+                    Clear all
+                </button>
+            }
+        >
             {hasHistory ? (
                 <div className="listCol">
                     {history.map((city) => (
