@@ -170,7 +170,9 @@
     background-color var(--theme-transition),
     border-color var(--theme-transition),
     box-shadow var(--theme-transition),
-    opacity var(--theme-transition);
+    opacity var(--theme-transition),
+    backdrop-filter var(--theme-transition),
+    -webkit-backdrop-filter var(--theme-transition);
 }
 
 .topbar {
