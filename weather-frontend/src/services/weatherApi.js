@@ -194,6 +194,11 @@ export async function removeFavorite(city) {
     return nextFavorites;
 }
 
+export async function clearFavorites() {
+    saveFavoritesList([]);
+    return [];
+}
+
 export async function fetchCitySuggestions(query) {
     const normalizedQuery = query.trim();
 
