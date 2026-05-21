@@ -28,11 +28,17 @@ const THEME_LABELS = {
 const THEME_ICONS = {
     system: (
         <svg className="themeSvg" viewBox="0 0 24 24" aria-hidden="true">
-            <circle className="themeSystemLight" cx="12" cy="12" r="8.5" />
-            <path className="themeSystemDark" d="M12 3.5a8.5 8.5 0 0 1 0 17Z" />
+             <path className="themeSystemLight"
+             d="M12 3.5a8.5 8.5 0 0 0 0 17Z"
+             />
+            <path className="themeSystemDark"
+            d="M12 3.5a8.5 8.5 0 0 1 0 17Z"
+            />
             <path className="themeSystemLine" d="M12 3.5v17" />
-            <circle className="themeSystemSun" cx="8.2" cy="9" r="1.8" />
-            <path className="themeSystemMoon" d="M16.7 8.2a4.3 4.3 0 0 0 0 7.6 4.4 4.4 0 1 1 0-7.6Z" />
+            <circle className="themeSystemSun" cx="8.2" cy="12" r="2.1" />
+            <path className="themeSystemMoon"
+            d="M16.8 10a3.2 0 0 0 0 4 3.3 3.3 0 1 1 0-4Z"
+            />
         </svg>
     ),
     dark: (
