@@ -19,6 +19,48 @@ import "./App.css";
 
 const THEME_STORAGE_KEY = "weather_theme";
 const SYSTEM_LIGHT_THEME_QUERY = "(prefers-color-scheme: light)";
+const THEME_OPTIONS = ["system", "dark", "light"];
+const THEME_LABELS = {
+    system: "System theme",
+    dark: "Dark theme",
+    light: "Light theme",
+};
+const THEME_ICONS = {
+    system: (
+        <svg className="themeSvg" viewBox="0 0 24 24" aria-hidden="true">
+             <path className="themeSystemLight"
+             d="M12 3.5a8.5 8.5 0 0 0 0 17Z"
+             />
+            <path className="themeSystemDark"
+            d="M12 3.5a8.5 8.5 0 0 1 0 17Z"
+            />
+            <path className="themeSystemLine" d="M12 3.5v17" />
+            <circle className="themeSystemSun" cx="8.2" cy="12" r="2.1" />
+            <path className="themeSystemMoon"
+            d="M16.8 10a3.2 0 0 0 0 4 3.3 3.3 0 1 1 0-4Z"
+            />
+        </svg>
+    ),
+    dark: (
+        <svg className="themeSvg" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+                className="themeMoon"
+                d="M18.4 15.5A7.5 7.5 0 0 1 8.5 5.6a7.6 7.6 0 1 0 9.9 9.9Z"
+            />
+            <path className="themeStarLarge" d="M17.4 4.4l.55 1.45 1.45.55-1.45.55-.55 1.45-.55-1.45-1.45-.55 1.45-.55.55-1.45Z" />
+            <path className="themeStarSmall" d="M20.2 9.4l.35.85.85.35-.85.35-.35.85-.35-.85-.85-.35.85-.35.35-.85Z" />
+        </svg>
+    ),
+    light: (
+        <svg className="themeSvg" viewBox="0 0 24 24" aria-hidden="true">
+            <circle className="themeSunCore" cx="12" cy="12" r="4.2" />
+            <path
+                className="themeSunRays"
+                d="M12 2.8v2.4M12 18.8v2.4M4.2 12H1.8M22.2 12h-2.4M6.45 6.45 4.75 4.75M19.25 19.25l-1.7-1.7M17.55 6.45l1.7-1.7M4.75 19.25l1.7-1.7"
+            />
+        </svg>
+    ),
+};
 
 function normalizeThemePreference(value) {
     if (value === "soft") {
@@ -46,6 +88,13 @@ function getSystemTheme() {
 
 function resolveTheme(themePreference, systemTheme) {
     return themePreference === "system" ? systemTheme : themePreference;
+}
+
+function getNextThemePreference(themePreference) {
+    const currentIndex = THEME_OPTIONS.indexOf(themePreference);
+    const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % THEME_OPTIONS.length;
+
+    return THEME_OPTIONS[nextIndex];
 }
 
 function getInitialThemePreference() {
@@ -148,8 +197,10 @@ export default function App() {
         addHistoryM.mutate(resolvedCity);
     }, [addHistoryM, currentQ.data?.city, currentQ.isError]);
 
-    function handleThemePreferenceChange(nextPreference) {
-        setThemePreference(nextPreference);
+    function handleThemePreferenceToggle() {
+        setThemePreference((currentPreference) =>
+            getNextThemePreference(currentPreference),
+        );
     }
 
     function handleSearch(nextCityOverride) {
@@ -231,27 +282,21 @@ export default function App() {
                     </div>
 
                     <div className="topbarActions">
-                        <div
+                        <button
                             className="themeToggle"
+                            type="button"
                             data-active={themePreference}
-                            aria-label="Theme"
+                            aria-label={`${THEME_LABELS[themePreference]}. Switch theme mode`}
+                            title={THEME_LABELS[themePreference]}
+                            onClick={handleThemePreferenceToggle}
                         >
-                            {["system", "dark", "light"].map((option) => (
-                                <button
-                                    className={
-                                        option === themePreference ? "active" : ""
-                                    }
-                                    key={option}
-                                    type="button"
-                                    aria-pressed={option === themePreference}
-                                    onClick={() =>
-                                        handleThemePreferenceChange(option)
-                                    }
-                                >
-                                    {option}
-                                </button>
-                            ))}
-                        </div>
+                            <span className="themeIcon" aria-hidden="true">
+                                {THEME_ICONS[themePreference]}
+                            </span>
+                            <span className="srOnly">
+                                {THEME_LABELS[themePreference]}
+                            </span>
+                        </button>
 
                         <SearchBar
                             input={input}

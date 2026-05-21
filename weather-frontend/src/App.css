@@ -89,7 +89,7 @@
 .topbar,
 .card,
 .themeToggle,
-.themeToggle button,
+.themeIcon,
 .searchInput,
 .searchBtn,
 .stat,
@@ -138,75 +138,159 @@
 }
 
 .themeToggle {
-  --toggle-gap: 4px;
-  --toggle-padding: 4px;
-  --toggle-item-width: calc((100% - (var(--toggle-padding) * 2) - (var(--toggle-gap) * 2)) / 3);
+  --toggle-size: 46px;
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(70px, 1fr));
-  gap: var(--toggle-gap);
-  padding: var(--toggle-padding);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--toggle-size);
+  height: var(--toggle-size);
+  flex: 0 0 var(--toggle-size);
+  padding: 0;
   border-radius: 14px;
   border: 1px solid var(--card-border);
   background-color: var(--control-bg);
+  color: var(--text-main);
+  cursor: pointer;
   overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(0) scale(1);
+  transition:
+    color var(--theme-transition),
+    background-color var(--theme-transition),
+    border-color var(--theme-transition),
+    box-shadow var(--theme-transition),
+    transform 180ms ease;
 }
 
 .themeToggle::before {
   content: "";
   position: absolute;
-  top: var(--toggle-padding);
-  bottom: var(--toggle-padding);
-  left: var(--toggle-padding);
-  width: var(--toggle-item-width);
-  border-radius: 10px;
+  inset: 4px;
+  border-radius: inherit;
   background-color: var(--toggle-indicator-bg);
-  box-shadow: 0 8px 20px var(--shadow);
-  transform: translate3d(0, 0, 0);
+  opacity: 0;
+  transform: scale(0.82);
   transition:
-    transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    background-color var(--theme-transition),
-    box-shadow var(--theme-transition);
-  will-change: transform;
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity var(--theme-transition),
+    background-color var(--theme-transition);
 }
 
-.themeToggle[data-active="dark"]::before {
-  transform: translate3d(calc(100% + var(--toggle-gap)), 0, 0);
+.themeToggle:hover {
+  background-color: var(--control-hover-bg);
+  transform: translateY(-1px);
 }
 
-.themeToggle[data-active="light"]::before {
-  transform: translate3d(calc((100% + var(--toggle-gap)) * 2), 0, 0);
+.themeToggle:hover::before {
+  opacity: 0.55;
+  transform: scale(1);
 }
 
-.themeToggle button {
+.themeToggle:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.themeToggle:focus {
+  outline: none;
+}
+
+.themeToggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.themeIcon {
   position: relative;
   z-index: 1;
-  min-width: 70px;
-  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transform: rotate(0deg);
+  transition:
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity var(--theme-transition);
+}
+
+.themeSvg {
+  width: 24px;
+  height: 24px;
+  overflow: visible;
+  transition:
+    transform var(--theme-transition),
+    opacity var(--theme-transition);
+}
+
+.themeToggle[data-active="system"] .themeIcon {
+  transform: rotate(0deg);
+}
+
+.themeToggle[data-active="dark"] .themeIcon {
+  transform: rotate(-12deg);
+}
+
+.themeToggle[data-active="light"] .themeIcon {
+  transform: rotate(45deg);
+}
+
+.themeMoon {
+  fill: #dbeafe;
+}
+
+.themeStarLarge {
+  fill: #93c5fd;
+}
+
+.themeStarSmall {
+  fill: rgba(147, 197, 253, 0.78);
+}
+
+.themeSunCore {
+  fill: #facc15;
+}
+
+.themeSunRays {
+  fill: none;
+  stroke: #facc15;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.themeSystemLight {
+  fill: #dbeafe;
+}
+
+.themeSystemDark {
+  fill: #172033;
+}
+
+.themeSystemLine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-linecap: round;
+  stroke-width: 1.2;
+}
+
+.themeSystemSun {
+  fill: #facc15;
+}
+
+.themeSystemMoon {
+  fill: #93c5fd;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   border: 0;
-  border-radius: 10px;
-  background-color: transparent;
-  color: var(--text-main);
-  cursor: pointer;
-  font: inherit;
-  text-transform: capitalize;
-  transform: translateZ(0);
-}
-
-.themeToggle button:hover {
-  color: var(--text-main);
-}
-
-.themeToggle button:focus {
-  outline: none;
-}
-
-.themeToggle button:focus-visible {
-  outline: none;
-}
-
-.themeToggle button.active {
-  pointer-events: none;
 }
 
 .h1 {
@@ -501,7 +585,8 @@
   }
 
   .themeToggle {
-    flex: 0 0 auto;
+    align-self: flex-start;
+    flex: 0 0 var(--toggle-size);
   }
 }
 
@@ -680,7 +765,9 @@
   .card,
   .themeToggle,
   .themeToggle::before,
-  .themeToggle button,
+  .themeIcon,
+  .themeIcon::before,
+  .themeIcon::after,
   .searchInput,
   .searchBtn,
   .stat,
@@ -729,11 +816,11 @@
   }
 
   .topbarActions {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: stretch;
     gap: 10px;
   }
 
-  .themeToggle,
   .searchWrap,
   .search {
     width: 100%;
@@ -741,12 +828,9 @@
   }
 
   .themeToggle {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .themeToggle button {
-    min-width: 0;
-    min-height: 40px;
+    --toggle-size: 44px;
+    align-self: auto;
+    flex: 0 0 var(--toggle-size);
   }
 
   .card {
