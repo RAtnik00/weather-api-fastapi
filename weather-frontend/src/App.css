@@ -147,34 +147,48 @@
   height: var(--toggle-size);
   flex: 0 0 var(--toggle-size);
   padding: 0;
-  border-radius: 50%;
+  border-radius: 14px;
   border: 1px solid var(--card-border);
   background-color: var(--control-bg);
   color: var(--text-main);
   cursor: pointer;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(0) scale(1);
+  transition:
+    color var(--theme-transition),
+    background-color var(--theme-transition),
+    border-color var(--theme-transition),
+    box-shadow var(--theme-transition),
+    transform 180ms ease;
 }
 
 .themeToggle::before {
   content: "";
   position: absolute;
-  inset: 5px;
+  inset: 4px;
   border-radius: inherit;
   background-color: var(--toggle-indicator-bg);
-  box-shadow: 0 10px 24px var(--shadow);
-  opacity: 0.74;
-  transform: scale(0.9);
+  opacity: 0;
+  transform: scale(0.82);
   transition:
     transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity var(--theme-transition),
-    background-color var(--theme-transition),
-    box-shadow var(--theme-transition);
+    background-color var(--theme-transition);
+}
+
+.themeToggle:hover {
+  background-color: var(--control-hover-bg);
+  transform: translateY(-1px);
 }
 
 .themeToggle:hover::before {
-  opacity: 1;
+  opacity: 0.55;
   transform: scale(1);
+}
+
+.themeToggle:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .themeToggle:focus {
@@ -189,81 +203,82 @@
 .themeIcon {
   position: relative;
   z-index: 1;
-  display: block;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  transform: rotate(0deg) scale(1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transform: rotate(0deg);
   transition:
     transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    width var(--theme-transition),
-    height var(--theme-transition),
-    background-color var(--theme-transition),
-    border-color var(--theme-transition),
-    box-shadow var(--theme-transition);
+    opacity var(--theme-transition);
 }
 
-.themeIcon::before,
-.themeIcon::after {
-  content: "";
-  position: absolute;
-  border-radius: inherit;
+.themeSvg {
+  width: 24px;
+  height: 24px;
+  overflow: visible;
   transition:
-    opacity var(--theme-transition),
     transform var(--theme-transition),
-    background-color var(--theme-transition),
-    box-shadow var(--theme-transition);
+    opacity var(--theme-transition);
 }
 
 .themeToggle[data-active="system"] .themeIcon {
-  border: 1px solid rgba(255, 255, 255, 0.34);
-  background: linear-gradient(90deg, #f8fafc 0 50%, #172033 50% 100%);
-  box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.12);
-}
-
-.themeToggle[data-active="system"] .themeIcon::before {
-  inset: 4px;
-  background: linear-gradient(90deg, #facc15 0 50%, #0b1220 50% 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
-}
-
-.themeToggle[data-active="system"] .themeIcon::after {
-  inset: -5px;
-  border: 1px solid rgba(147, 197, 253, 0.28);
-  opacity: 0.65;
+  transform: rotate(0deg);
 }
 
 .themeToggle[data-active="dark"] .themeIcon {
-  background-color: #dbeafe;
-  box-shadow: inset -8px -2px 0 #6f94c9, 0 0 0 4px rgba(147, 197, 253, 0.12);
-  transform: rotate(-18deg) scale(1);
-}
-
-.themeToggle[data-active="dark"] .themeIcon::before,
-.themeToggle[data-active="dark"] .themeIcon::after {
-  opacity: 0;
+  transform: rotate(-12deg);
 }
 
 .themeToggle[data-active="light"] .themeIcon {
-  width: 16px;
-  height: 16px;
-  background-color: #facc15;
-  box-shadow:
-    0 -10px 0 -5px #facc15,
-    0 10px 0 -5px #facc15,
-    10px 0 0 -5px #facc15,
-    -10px 0 0 -5px #facc15,
-    7px 7px 0 -5px #facc15,
-    -7px 7px 0 -5px #facc15,
-    7px -7px 0 -5px #facc15,
-    -7px -7px 0 -5px #facc15,
-    0 0 0 4px rgba(250, 204, 21, 0.18);
-  transform: rotate(45deg) scale(1);
+  transform: rotate(45deg);
 }
 
-.themeToggle[data-active="light"] .themeIcon::before,
-.themeToggle[data-active="light"] .themeIcon::after {
-  opacity: 0;
+.themeMoon {
+  fill: #dbeafe;
+}
+
+.themeStarLarge {
+  fill: #93c5fd;
+}
+
+.themeStarSmall {
+  fill: rgba(147, 197, 253, 0.78);
+}
+
+.themeSunCore {
+  fill: #facc15;
+}
+
+.themeSunRays {
+  fill: none;
+  stroke: #facc15;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.themeSystemLight {
+  fill: #dbeafe;
+}
+
+.themeSystemDark {
+  fill: #172033;
+}
+
+.themeSystemLine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-linecap: round;
+  stroke-width: 1.4;
+}
+
+.themeSystemSun {
+  fill: #facc15;
+}
+
+.themeSystemMoon {
+  fill: #93c5fd;
 }
 
 .srOnly {
