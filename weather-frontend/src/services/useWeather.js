@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     addFavorite,
     addHistory,
+    clearFavorites,
     clearHistory,
     fetchCitySuggestions,
     fetchCurrentWeather,
@@ -122,6 +123,10 @@ export function useAddFavorite() {
 
 export function useRemoveFavorite() {
     return useFavoritesMutation(removeFavorite);
+}
+
+export function useClearFavorites() {
+    return useFavoritesMutation(clearFavorites);
 }
 
 export function useAddHistory() {
