@@ -38,16 +38,19 @@ Users can:
 -   Refresh weather data with visual feedback
 -   Switch between System, Dark, and Light blue themes
 -   Keep the selected theme after page reload
+-   Enable optional Liquid Glass visual mode
 -   Use an optimized mobile layout
 
-Favorites and history are stored locally in the browser.
+Favorites, history, selected theme, and visual mode are stored locally in the
+browser.
 
 ------------------------------------------------------------------------
 
 # Latest Update
 
 The project has received several frontend updates focused on startup speed,
-theme experience, mobile usability, and local browser data controls.
+theme experience, mobile usability, local browser data controls, and optional
+Liquid Glass styling.
 
 ## General completed work
 
@@ -62,6 +65,12 @@ theme experience, mobile usability, and local browser data controls.
 -   Smooth animated transition between dark blue and light blue themes
 -   Sliding segmented control for theme selection
 -   Theme preference is saved in localStorage
+-   Optional Liquid Glass mode can be enabled for stronger devices
+-   Liquid Glass preference is saved in localStorage
+-   Glass surfaces use blur, transparency, soft borders, and layered shadows
+-   Glass mode includes fallbacks for unsupported backdrop-filter browsers
+-   Reduced-motion users receive lighter glass effects without extra motion
+-   Buttons share consistent hover and active motion
 
 ## Mobile update
 
@@ -74,6 +83,8 @@ theme experience, mobile usability, and local browser data controls.
 ## History and refresh update
 
 -   Clear History action was added
+-   Clear all Favorites action was added
+-   History and Favorites clear actions are placed in card headers
 -   Search history stays cleared after page reload
 -   Automatic weather loads no longer repopulate history
 -   History is saved only after explicit city search or city selection
@@ -98,6 +109,7 @@ Frontend
 -   React Query
 -   CSS variables for theme styling
 -   prefers-color-scheme support
+-   backdrop-filter based Liquid Glass styling
 
 Infrastructure
 
@@ -249,7 +261,7 @@ Possible improvements:
 -   User authentication
 -   Database storage for favorites
 -   Weather API caching
--   Liquid glass inspired UI styling
+-   Advanced Liquid Glass performance presets
 -   Docker containerization
 -   CI/CD pipeline
 
