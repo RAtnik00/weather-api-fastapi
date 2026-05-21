@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
     useAddFavorite,
     useAddHistory,
+    useClearFavorites,
     useClearHistory,
     useFavorites,
     useHistory,
@@ -156,6 +157,7 @@ export default function App() {
     const removeFavoriteM = useRemoveFavorite();
     const addHistoryM = useAddHistory();
     const clearHistoryM = useClearHistory();
+    const clearFavoritesM = useClearFavorites();
 
     const pendingHistoryCityRef = useRef(null);
 
@@ -240,6 +242,10 @@ export default function App() {
 
     function handleRemoveFavorite(targetCity) {
         removeFavoriteM.mutate(targetCity);
+    }
+
+    function handleClearFavorites() {
+        clearFavoritesM.mutate();
     }
 
     function handleClearHistory() {
@@ -334,7 +340,9 @@ export default function App() {
                                 favoritesQ={favoritesQ}
                                 onSelectCity={handleSelectCity}
                                 onRemoveFavorite={handleRemoveFavorite}
+                                onClearFavorites={handleClearFavorites}
                                 removingCity={removeFavoriteM.variables}
+                                isClearingFavorites={clearFavoritesM.isPending}
                             />
                         </div>
                     </section>
