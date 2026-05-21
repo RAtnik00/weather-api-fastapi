@@ -19,6 +19,7 @@ import { DEFAULT_CITY } from "./constants/weather";
 import "./App.css";
 
 const THEME_STORAGE_KEY = "weather_theme";
+const LIQUID_GLASS_STORAGE_KEY = "weather_liquid_glass";
 const SYSTEM_LIGHT_THEME_QUERY = "(prefers-color-scheme: light)";
 const THEME_OPTIONS = ["system", "dark", "light"];
 const THEME_LABELS = {
@@ -102,6 +103,10 @@ function getInitialThemePreference() {
     return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
 }
 
+function getInitialLiquidGlassMode() {
+    return localStorage.getItem(LIQUID_GLASS_STORAGE_KEY) === "enabled";
+}
+
 function isSameCity(firstCity, secondCity) {
     return firstCity?.trim().toLowerCase() === secondCity?.trim().toLowerCase();
 }
@@ -130,6 +135,7 @@ function renderConsentModal({ onAccept, onDecline }) {
 
 export default function App() {
     const [themePreference, setThemePreference] = useState(getInitialThemePreference);
+    const [isLiquidGlassEnabled, setIsLiquidGlassEnabled] = useState(getInitialLiquidGlassMode);
     const [systemTheme, setSystemTheme] = useState(getSystemTheme);
     const [input, setInput] = useState(DEFAULT_CITY);
     const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
@@ -160,6 +166,19 @@ export default function App() {
     const clearFavoritesM = useClearFavorites();
 
     const pendingHistoryCityRef = useRef(null);
+
+    useLayoutEffect(() => {
+        document.documentElement.dataset.glass = isLiquidGlassEnabled
+            ? "liquid"
+            : "standard";
+    }, [isLiquidGlassEnabled]);
+
+    useEffect(() => {
+        localStorage.setItem(
+            LIQUID_GLASS_STORAGE_KEY,
+            isLiquidGlassEnabled ? "enabled" : "disabled"
+        );
+    }, [isLiquidGlassEnabled]);
 
     useLayoutEffect(() => {
         applyTheme(theme);
@@ -203,6 +222,10 @@ export default function App() {
         setThemePreference((currentPreference) =>
             getNextThemePreference(currentPreference),
         );
+    }
+
+    function handleLiquidGlassToggle() {
+        setIsLiquidGlassEnabled((currentValue) => !currentValue);
     }
 
     function handleSearch(nextCityOverride) {
@@ -302,6 +325,18 @@ export default function App() {
                             <span className="srOnly">
                                 {THEME_LABELS[themePreference]}
                             </span>
+                        </button>
+
+                        <button
+                            className="glassToggle"
+                            type="button"
+                            data-active={isLiquidGlassEnabled}
+                            aria-pressed={isLiquidGlassEnabled}
+                            aria-label="Toggle liquid glass mode"
+                            title="Liquid glass mode"
+                            onClick={handleLiquidGlassToggle}
+                        >
+                            Glass
                         </button>
 
                         <SearchBar
