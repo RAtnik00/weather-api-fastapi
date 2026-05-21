@@ -89,6 +89,7 @@
 .topbar,
 .card,
 .themeToggle,
+.glassToggle,
 .themeIcon,
 .searchInput,
 .searchBtn,
@@ -198,6 +199,51 @@
 .themeToggle:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
+}
+
+.glassToggle {
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  background-color: var(--control-bg);
+  color: var(--text-main);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0;
+  transition:
+    color var(--theme-transition),
+    background-color var(--theme-transition),
+    border-color var(--theme-transition),
+    box-shadow var(--theme-transition),
+    transform 180ms ease;
+}
+
+.glassToggle:hover {
+  background-color: var(--control-hover-bg);
+  transform: translateY(-1px);
+}
+
+.glassToggle:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.glassToggle:focus {
+  outline: none;
+}
+
+.glassToggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.glassToggle[data-active="true"] {
+  background-color: rgba(147, 197, 253, 0.18);
+  border-color: rgba(147, 197, 253, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 28px rgba(37, 99, 235, 0.14);
 }
 
 .themeIcon {
@@ -776,6 +822,7 @@
   .topbar,
   .card,
   .themeToggle,
+  .glassToggle,
   .themeToggle::before,
   .themeIcon,
   .themeIcon::before,
@@ -843,6 +890,11 @@
     --toggle-size: 44px;
     align-self: auto;
     flex: 0 0 var(--toggle-size);
+  }
+
+  .glassToggle {
+    height: 44px;
+    flex: 0 0 auto;
   }
 
   .card {
