@@ -5,7 +5,7 @@
   --page-bg-light: radial-gradient(1200px 800px at 20% 10%, #d9edff 0%, #b8d6f1 45%, #8fb5d8 100%);
   --page-bg: var(--page-bg-dark);
   --theme-transition: 480ms cubic-bezier(0.22, 1, 0.36, 1);
-  --glass-transition: 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --glass-transition: 360ms cubic-bezier(0.22, 1, 0.36, 1);
   --text-main: white;
   --text-muted: rgba(255, 255, 255, 0.6);
   --text-soft: rgba(255, 255, 255, 0.72);
@@ -238,7 +238,8 @@
     border-color var(--glass-transition),
     border-radius var(--glass-transition),
     box-shadow var(--glass-transition),
-    opacity var(--glass-transition);
+    opacity var(--glass-transition),
+    transform 180ms ease;
 }
 
 .topbar {
@@ -256,6 +257,42 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+}
+
+.searchBtn,
+.ghostBtn,
+.listBtn,
+.dangerBtn,
+.suggestionItem,
+.consentActions button {
+  transform: translateY(0) scale(1);
+  transition:
+    color var(--theme-transition),
+    background-color var(--glass-transition),
+    border-color var(--glass-transition),
+    border-radius var(--glass-transition),
+    box-shadow var(--glass-transition),
+    opacity var(--glass-transition),
+    transform 180ms ease;
+}
+
+.searchBtn:hover,
+.ghostBtn:hover,
+.listBtn:hover,
+.dangerBtn:hover,
+.suggestionItem:hover,
+.suggestionItem.active,
+.consentActions button:hover {
+  transform: translateY(-1px);
+}
+
+.searchBtn:active,
+.ghostBtn:active,
+.listBtn:active,
+.dangerBtn:active,
+.suggestionItem:active,
+.consentActions button:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .themeToggle {
@@ -737,6 +774,7 @@
 .ghostBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 @media (max-width: 1100px) {
@@ -887,7 +925,6 @@
   color: var(--text-main);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .consentActions button:hover {
