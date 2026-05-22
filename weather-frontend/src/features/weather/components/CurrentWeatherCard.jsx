@@ -1,9 +1,11 @@
 import Card from "../../../components/Card.jsx";
+import { getWeatherVisual } from "../../../utils/weatherVisuals.js";
 import {
     formatTemperature,
     formatWind,
     formatHumidity,
 } from "../../../utils/weatherFormatters.js";
+import WeatherVisual from "./WeatherVisual.jsx";
 
 export default function CurrentWeatherCard({ currentQ }) {
     const weather = currentQ.data;
@@ -30,14 +32,21 @@ export default function CurrentWeatherCard({ currentQ }) {
         return <Card title="Current" />;
     }
 
+    const weatherVisual = getWeatherVisual(weather.condition);
+
     return (
         <Card title="Current">
             {currentQ.isFetching && (
                 <div className="refreshStatus">Updating current weather...</div>
             )}
+            <div className="currentWeatherHeader">
+                <div>
+                    <div className="city">{weather.city}</div>
+                    <div className="desc">{weather.condition}</div>
+                </div>
 
-            <div className="city">{weather.city}</div>
-            <div className="desc">{weather.condition}</div>
+                <WeatherVisual visual={weatherVisual} />
+            </div>
 
             <div className="tempRow">
                 <div className="temp">{formatTemperature(weather.temp_c)}</div>
