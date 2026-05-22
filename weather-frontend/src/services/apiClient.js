@@ -1,11 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
-const STORAGE_KEYS = {
-    cookieConsent: "weather_geo_cache_consent",
-};
-
-const DEFAULT_CONSENT = "unset";
-
 function hasValue(value) {
     return value !== undefined && value !== null && String(value).length > 0;
 }
@@ -27,14 +21,9 @@ function buildUrl(path, params) {
     return url.toString();
 }
 
-function getCookieConsent() {
-    return localStorage.getItem(STORAGE_KEYS.cookieConsent) || DEFAULT_CONSENT;
-}
-
 function buildHeaders(customHeaders = {}) {
     return {
         "Content-Type": "application/json",
-        "X-Cookie-Consent": getCookieConsent(),
         ...customHeaders,
     };
 }
@@ -63,7 +52,6 @@ function buildErrorMessage(response, data) {
 async function request(url, options = {}) {
     const response = await fetch(url, {
         ...options,
-        credentials: "include",
         headers: buildHeaders(options.headers),
     });
 
