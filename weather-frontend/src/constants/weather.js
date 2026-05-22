@@ -1,11 +1,11 @@
 export const DEFAULT_CITY = "Warsaw";
 
 export const STORAGE_KEYS = {
-    cookieConsent: "weather_geo_cache_consent",
+    geoCacheConsent: "weather_geo_cache_consent",
     coords: "weather_coords",
 };
 
-export const DEFAULT_COOKIE_CONSENT = "unset";
+export const DEFAULT_GEO_CACHE_CONSENT = "unset";
 
 export const WEATHER_QUERY_KEYS = {
     currentByCity: (city) => ["weather", "current", city],
