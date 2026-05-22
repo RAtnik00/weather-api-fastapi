@@ -166,15 +166,10 @@ Backend hosted on Render.
 
 Frontend hosted on Vercel.
 
-Cross‑site cookies are enabled using:
+The backend provides weather, forecast, and city suggestion endpoints.
 
-SameSite=None\
-Secure=True
-
-This allows the frontend to store cookies from the backend for:
-
--   search history
--   favorite cities
+Search history, favorite cities, selected theme, and visual mode are stored
+locally in the browser.
 
 ------------------------------------------------------------------------
 
@@ -195,16 +190,6 @@ GET /weather/current/by-coords?lat=52.23&lon=21.01
 Forecast by Coordinates
 
 GET /weather/forecast/by-coords?lat=52.23&lon=21.01
-
-Search History
-
-GET /history
-
-Favorites
-
-GET /favorites\
-POST /favorites/{city}\
-DELETE /favorites/{city}
 
 City Suggestions
 
