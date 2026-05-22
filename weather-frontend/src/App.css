@@ -76,6 +76,7 @@
 
 :root[data-glass="liquid"] .card,
 :root[data-glass="liquid"] .searchInput,
+:root[data-glass="liquid"] .weatherVisual,
 :root[data-glass="liquid"] .searchBtn,
 :root[data-glass="liquid"] .themeToggle,
 :root[data-glass="liquid"] .glassToggle,
@@ -132,6 +133,7 @@
   :root[data-glass="liquid"] .card,
   :root[data-glass="liquid"] .searchInput,
   :root[data-glass="liquid"] .searchBtn,
+  :root[data-glass="liquid"] .weatherVisual,
   :root[data-glass="liquid"] .themeToggle,
   :root[data-glass="liquid"] .glassToggle,
   :root[data-glass="liquid"] .stat,
@@ -185,6 +187,7 @@
 .topbar,
 .card,
 .themeToggle,
+.weatherVisual,
 .glassToggle,
 .themeIcon,
 .searchInput,
@@ -607,6 +610,93 @@
   color: var(--text-muted);
 }
 
+.currentWeatherHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.weatherVisual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--card-border);
+  background-color: var(--control-bg);
+  color: var(--text-main);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.weatherVisual-large {
+  width: 86px;
+  height: 86px;
+  border-radius: 22px;
+}
+
+.weatherVisual-small {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+}
+
+.weatherVisualSvg {
+  width: 74%;
+  height: 74%;
+  overflow: visible;
+}
+
+.weatherIconSunCore {
+  fill: #facc15;
+}
+
+.weatherIconSunRays,
+.weatherIconRain,
+.weatherIconSnow,
+.weatherIconStorm,
+.weatherIconFog {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.weatherIconSunRays {
+  stroke: #facc15;
+}
+
+.weatherIconCloud {
+  fill: rgba(191, 219, 254, 0.9);
+}
+
+.weatherIconRain {
+  stroke: #60a5fa;
+}
+
+.weatherIconSnow {
+  stroke: #dbeafe;
+  stroke-width: 7;
+}
+
+.weatherIconStorm {
+  fill: #fde047;
+}
+
+.weatherIconFog {
+  stroke: rgba(219, 234, 254, 0.82);
+}
+
+.forecastCondition {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.forecastCondition .muted {
+  min-width: 0;
+}
+
 .tempRow {
   display: flex;
   align-items: flex-end;
@@ -828,6 +918,20 @@
     padding: 18px 16px 24px;
   }
 
+  .currentWeatherHeader {
+    align-items: center;
+  }
+
+  .weatherVisual-large {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+  }
+
+  .forecastCondition {
+    grid-column: 1 / 4;
+  }
+
   .h1 {
     font-size: 30px;
   }
@@ -996,6 +1100,7 @@
   .themeIcon::before,
   .themeIcon::after,
   .searchInput,
+  .weatherVisual,
   .searchBtn,
   .stat,
   .ghostBtn,
@@ -1024,6 +1129,7 @@
 @media (prefers-reduced-motion: reduce) {
   :root[data-glass="liquid"] .card,
   :root[data-glass="liquid"] .searchInput,
+  :root[data-glass="liquid"] .weatherVisual,
   :root[data-glass="liquid"] .searchBtn,
   :root[data-glass="liquid"] .themeToggle,
   :root[data-glass="liquid"] .glassToggle,
