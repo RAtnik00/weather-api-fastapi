@@ -30,6 +30,7 @@ Users can:
 
 -   Search weather by city
 -   Get weather using current geolocation
+-   View condition-based weather visuals
 -   View multi‑day forecast
 -   Save cities to Favorites
 -   View Search History
@@ -37,6 +38,7 @@ Users can:
 -   Receive city suggestions while typing
 -   Refresh weather data with visual feedback
 -   Switch between System, Dark, and Light blue themes
+-   Receive theme change toast feedback
 -   Keep the selected theme after page reload
 -   Enable optional Liquid Glass visual mode
 -   Use an optimized mobile layout
@@ -48,15 +50,26 @@ browser.
 
 # Latest Update
 
-The project has received several frontend updates focused on startup speed,
-theme experience, mobile usability, local browser data controls, and optional
-Liquid Glass styling.
+The project has received several updates focused on startup speed, weather
+visuals, theme experience, mobile usability, local browser data controls,
+dependency cleanup, and optional Liquid Glass styling.
 
 ## General completed work
 
 -   Default city weather now loads immediately on first render
 -   Geolocation no longer blocks the initial dashboard load
 -   Generated Python cache files are ignored and removed from git tracking
+-   Backend dependency declarations were cleaned up for Poetry installs
+-   The unused skip package was removed
+-   cachetools was added as an explicit backend dependency
+-   Python support was relaxed to >=3.12,<3.15
+
+## Weather visuals update
+
+-   Weather condition visuals were added to the Current card
+-   Forecast rows now show compact weather icons
+-   Weather visuals support clear, cloudy, rainy, snowy, stormy, and foggy states
+-   Weather icon styling follows the active theme and Liquid Glass mode
 
 ## Theme update
 
@@ -71,6 +84,8 @@ Liquid Glass styling.
 -   Glass mode includes fallbacks for unsupported backdrop-filter browsers
 -   Reduced-motion users receive lighter glass effects without extra motion
 -   Buttons share consistent hover and active motion
+-   Liquid Glass toggle was redesigned as a compact square icon button
+-   Theme changes now show an accessible toast notification
 
 ## Mobile update
 
@@ -79,6 +94,10 @@ Liquid Glass styling.
 -   Weather cards use tighter spacing on phones
 -   Forecast rows become compact mobile cards instead of a wide table
 -   Forecast descriptions no longer overflow on narrow screens
+-   Theme, Glass, and Search controls use a stable mobile grid
+-   Search input and button keep consistent height on phones
+-   History and Favorites rows are easier to tap on narrow screens
+-   Theme toast adapts to mobile widths
 
 ## History and refresh update
 
@@ -100,6 +119,7 @@ Backend
 -   FastAPI
 -   Pydantic
 -   HTTPX
+-   Cachetools
 -   Pytest
 
 Frontend
@@ -146,15 +166,10 @@ Backend hosted on Render.
 
 Frontend hosted on Vercel.
 
-Cross‑site cookies are enabled using:
+The backend provides weather, forecast, and city suggestion endpoints.
 
-SameSite=None\
-Secure=True
-
-This allows the frontend to store cookies from the backend for:
-
--   search history
--   favorite cities
+Search history, favorite cities, selected theme, and visual mode are stored
+locally in the browser.
 
 ------------------------------------------------------------------------
 
@@ -175,16 +190,6 @@ GET /weather/current/by-coords?lat=52.23&lon=21.01
 Forecast by Coordinates
 
 GET /weather/forecast/by-coords?lat=52.23&lon=21.01
-
-Search History
-
-GET /history
-
-Favorites
-
-GET /favorites\
-POST /favorites/{city}\
-DELETE /favorites/{city}
 
 City Suggestions
 

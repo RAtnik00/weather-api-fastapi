@@ -1,9 +1,11 @@
 import Card from "../../../components/Card.jsx";
+import { getWeatherVisual } from "../../../utils/weatherVisuals.js";
 import {
     formatForecastDate,
     formatTemperature,
     formatWind,
 } from "../../../utils/weatherFormatters.js";
+import WeatherVisual from "./WeatherVisual.jsx";
 
 export default function ForecastCard({ forecastQ }) {
     const forecast = forecastQ.data;
@@ -56,7 +58,13 @@ export default function ForecastCard({ forecastQ }) {
                         <div>{formatTemperature(day.min_c)}</div>
                         <div>{formatTemperature(day.max_c)}</div>
                         <div className="muted">{formatWind(day.wind_kph)}</div>
-                        <div className="muted">{day.condition}</div>
+                        <div className="forecastCondition">
+                            <WeatherVisual
+                                visual={getWeatherVisual(day.condition)}
+                                size="small"
+                            />
+                            <span className="muted">{day.condition}</span>
+                        </div>
                     </div>
                 ))}
             </div>

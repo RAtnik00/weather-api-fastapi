@@ -1,14 +1,12 @@
-from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi import APIRouter, Depends, Query
 
 from app.dependencies.services import get_weather_service
-from app.dependencies.cookies import get_cookies_service
 from app.schemas.weather import (
     CitySuggestionResponse,
     CurrentWeatherResponse,
     ForecastResponse,
 )
 from app.services.weather_service import WeatherService
-from app.services.cookies_service import CookiesService
 
 router = APIRouter()
 
@@ -20,27 +18,10 @@ def health_check():
 
 @router.get("/weather/current", response_model=CurrentWeatherResponse)
 def current_weather(
-    request: Request,
-    response: Response,
     location: str = Query(..., min_length=2, max_length=64, strip_whitespace=True),
     service: WeatherService = Depends(get_weather_service),
-    cookies_service: CookiesService = Depends(get_cookies_service),
 ):
-    result = service.get_current_weather(location)
-
-    if cookies_service.has_cookie_consent(request):
-        history = cookies_service.get_history(request.cookies)
-        history = cookies_service.add_to_history(history, result.city)
-
-        response.set_cookie(
-            key=cookies_service.HISTORY_KEY,
-            value=cookies_service.encode_history(history),
-            **cookies_service.COOKIE_OPTIONS,
-        )
-    else:
-        cookies_service.clear_weather_cookies(response)
-
-    return result
+    return service.get_current_weather(location)
 
 
 @router.get("/weather/forecast", response_model=ForecastResponse)
@@ -53,28 +34,11 @@ def forecast_weather(
 
 @router.get("/weather/current/by-coords", response_model=CurrentWeatherResponse)
 def current_weather_by_coords(
-    request: Request,
-    response: Response,
     lat: float = Query(...),
     lon: float = Query(...),
     service: WeatherService = Depends(get_weather_service),
-    cookies_service: CookiesService = Depends(get_cookies_service),
 ):
-    result = service.get_current_weather_by_coords(lat=lat, lon=lon)
-
-    if cookies_service.has_cookie_consent(request):
-        history = cookies_service.get_history(request.cookies)
-        history = cookies_service.add_to_history(history, result.city)
-
-        response.set_cookie(
-            key=cookies_service.HISTORY_KEY,
-            value=cookies_service.encode_history(history),
-            **cookies_service.COOKIE_OPTIONS,
-        )
-    else:
-        cookies_service.clear_weather_cookies(response)
-
-    return result
+    return service.get_current_weather_by_coords(lat=lat, lon=lon)
 
 
 @router.get("/weather/forecast/by-coords", response_model=ForecastResponse)
@@ -84,78 +48,6 @@ def forecast_weather_by_coords(
     service: WeatherService = Depends(get_weather_service),
 ):
     return service.get_forecast_by_coords(lat=lat, lon=lon)
-
-
-@router.get("/history")
-def get_history(
-    request: Request,
-    response: Response,
-    cookies_service: CookiesService = Depends(get_cookies_service),
-):
-    if not cookies_service.has_cookie_consent(request):
-        cookies_service.clear_weather_cookies(response)
-        return {"history": []}
-
-    history = cookies_service.get_history(request.cookies)
-    return {"history": history}
-
-
-@router.get("/favorites")
-def get_favorites(
-    request: Request,
-    response: Response,
-    cookies_service: CookiesService = Depends(get_cookies_service),
-):
-    if not cookies_service.has_cookie_consent(request):
-        cookies_service.clear_weather_cookies(response)
-        return {"favorites": []}
-
-    favorites = cookies_service.get_favorites(request.cookies)
-    return {"favorites": favorites}
-
-
-@router.post("/favorites/{location}")
-def add_favorite(
-    location: str,
-    request: Request,
-    response: Response,
-    cookies_service: CookiesService = Depends(get_cookies_service),
-):
-    if not cookies_service.has_cookie_consent(request):
-        cookies_service.clear_weather_cookies(response)
-        return {"favorites": []}
-
-    favorites = cookies_service.get_favorites(request.cookies)
-    favorites = cookies_service.add_favorite(favorites, location)
-
-    response.set_cookie(
-        key=cookies_service.FAVORITES_KEY,
-        value=cookies_service.encode_favorites(favorites),
-        **cookies_service.COOKIE_OPTIONS,
-    )
-    return {"favorites": favorites}
-
-
-@router.delete("/favorites/{location}")
-def remove_favorite(
-    location: str,
-    request: Request,
-    response: Response,
-    cookies_service: CookiesService = Depends(get_cookies_service),
-):
-    if not cookies_service.has_cookie_consent(request):
-        cookies_service.clear_weather_cookies(response)
-        return {"favorites": []}
-
-    favorites = cookies_service.get_favorites(request.cookies)
-    favorites = cookies_service.remove_favorite(favorites, location)
-
-    response.set_cookie(
-        key=cookies_service.FAVORITES_KEY,
-        value=cookies_service.encode_favorites(favorites),
-        **cookies_service.COOKIE_OPTIONS,
-    )
-    return {"favorites": favorites}
 
 
 @router.get("/weather/cities", response_model=list[CitySuggestionResponse])

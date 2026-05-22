@@ -7,16 +7,16 @@ import {
 } from "../services/useWeather";
 import {
     DEFAULT_CITY,
-    DEFAULT_COOKIE_CONSENT,
+    DEFAULT_GEO_CACHE_CONSENT,
     STORAGE_KEYS,
 } from "../constants/weather";
 
 function getStoredConsent() {
-    return localStorage.getItem(STORAGE_KEYS.cookieConsent) || DEFAULT_COOKIE_CONSENT;
+    return localStorage.getItem(STORAGE_KEYS.geoCacheConsent) || DEFAULT_GEO_CACHE_CONSENT;
 }
 
 function getStoredCoords() {
-    const consent = localStorage.getItem(STORAGE_KEYS.cookieConsent);
+    const consent = localStorage.getItem(STORAGE_KEYS.geoCacheConsent);
     if (consent !== "accepted") return null;
 
     const raw = localStorage.getItem(STORAGE_KEYS.coords);
@@ -39,7 +39,7 @@ function getStoredCoords() {
 }
 
 function shouldUseStoredGeolocation() {
-    const consent = localStorage.getItem(STORAGE_KEYS.cookieConsent);
+    const consent = localStorage.getItem(STORAGE_KEYS.geoCacheConsent);
     if (consent !== "accepted") return false;
 
     const raw = localStorage.getItem(STORAGE_KEYS.coords);
@@ -155,7 +155,7 @@ export function useGeoWeather(selectedCity) {
 
     function handleAcceptGeoCache() {
         setGeoCacheConsent("accepted");
-        localStorage.setItem(STORAGE_KEYS.cookieConsent, "accepted");
+        localStorage.setItem(STORAGE_KEYS.geoCacheConsent, "accepted");
 
         if (pendingCoords) {
             localStorage.setItem(
@@ -169,7 +169,7 @@ export function useGeoWeather(selectedCity) {
 
     function handleDeclineGeoCache() {
         setGeoCacheConsent("declined");
-        localStorage.setItem(STORAGE_KEYS.cookieConsent, "declined");
+        localStorage.setItem(STORAGE_KEYS.geoCacheConsent, "declined");
         localStorage.removeItem(STORAGE_KEYS.coords);
 
         if (pendingCoords) {
@@ -181,7 +181,7 @@ export function useGeoWeather(selectedCity) {
     }
 
     const mustAnswerConsent =
-        pendingCoords && geoCacheConsent === DEFAULT_COOKIE_CONSENT;
+        pendingCoords && geoCacheConsent === DEFAULT_GEO_CACHE_CONSENT;
 
     const activeCity = currentQ.data?.city || selectedCity || DEFAULT_CITY;
 
