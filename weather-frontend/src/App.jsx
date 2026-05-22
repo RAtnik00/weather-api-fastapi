@@ -64,6 +64,24 @@ const THEME_ICONS = {
     ),
 };
 
+const GLASS_ICON = (
+    <svg className="glassIcon" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+            className="glassIconPane glassIconPaneBack"
+            d="M8.2 5.4h8.6c1.1 0 2 .9 2 2v8.6c0 1.1-.9 2-2 2H8.2c-1.1 0-2-.9-2-2V7.4c0-1.1.9-2 2-2Z"
+        />
+        <path
+            className="glassIconPane glassIconPaneFront"
+            d="M6.8 4h8.6c1.1 0 2 .9 2 2v8.6c0 1.1-.9 2-2 2H6.8c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"
+        />
+        <path
+            className="glassIconHighlight"
+            d="M8 7.2h5.2M8 9.7h2.8"
+        />
+        <circle className="glassIconDot" cx="16.2" cy="16.1" r="1.6" />
+    </svg>
+);
+
 function normalizeThemePreference(value) {
     if (value === "soft") {
         return "light";
@@ -332,11 +350,26 @@ export default function App() {
                             type="button"
                             data-active={isLiquidGlassEnabled}
                             aria-pressed={isLiquidGlassEnabled}
-                            aria-label="Toggle liquid glass mode"
-                            title="Liquid glass mode"
+                            aria-label={
+                                isLiquidGlassEnabled
+                                    ? "Disable liquid glass mode"
+                                    : "Enable liquid glass mode"
+                            }
+                            title={
+                                isLiquidGlassEnabled
+                                    ? "Disable liquid glass mode"
+                                    : "Enable liquid glass mode"
+                            }
                             onClick={handleLiquidGlassToggle}
                         >
-                            Glass
+                            <span className="glassIconWrap" aria-hidden="true">
+                                {GLASS_ICON}
+                            </span>
+                            <span className="srOnly">
+                                {isLiquidGlassEnabled
+                                    ? "Liquid glass mode enabled"
+                                    : "Liquid glass mode disabled"}
+                            </span>
                         </button>
 
                         <SearchBar
