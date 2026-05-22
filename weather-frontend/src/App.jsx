@@ -27,6 +27,11 @@ const THEME_LABELS = {
     dark: "Dark theme",
     light: "Light theme",
 };
+const THEME_TOAST_MESSAGES = {
+    system: "System theme enabled",
+    dark: "Dark theme enabled",
+    light: "Light theme enabled",
+};
 const THEME_ICONS = {
     system: (
         <svg className="themeSvg" viewBox="0 0 24 24" aria-hidden="true">
@@ -155,6 +160,7 @@ export default function App() {
     const [themePreference, setThemePreference] = useState(getInitialThemePreference);
     const [isLiquidGlassEnabled, setIsLiquidGlassEnabled] = useState(getInitialLiquidGlassMode);
     const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+    const [themeToast, setThemeToast] = useState(null);
     const [input, setInput] = useState(DEFAULT_CITY);
     const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
     const theme = resolveTheme(themePreference, systemTheme);
@@ -184,12 +190,19 @@ export default function App() {
     const clearFavoritesM = useClearFavorites();
 
     const pendingHistoryCityRef = useRef(null);
+    const themeToastTimeoutRef = useRef(null);
 
     useLayoutEffect(() => {
         document.documentElement.dataset.glass = isLiquidGlassEnabled
             ? "liquid"
             : "standard";
     }, [isLiquidGlassEnabled]);
+
+    useEffect(() => {
+        return () => {
+            window.clearTimeout(themeToastTimeoutRef.current);
+        };
+    }, []);
 
     useEffect(() => {
         localStorage.setItem(
@@ -236,10 +249,24 @@ export default function App() {
         addHistoryM.mutate(resolvedCity);
     }, [addHistoryM, currentQ.data?.city, currentQ.isError]);
 
+    function showThemeToast(nextThemePreference) {
+        window.clearTimeout(themeToastTimeoutRef.current);
+
+        setThemeToast({
+            theme: nextThemePreference,
+            message: THEME_TOAST_MESSAGES[nextThemePreference],
+        });
+
+        themeToastTimeoutRef.current = window.setTimeout(() => {
+            setThemeToast(null);
+        }, 2200);
+    }
+
     function handleThemePreferenceToggle() {
-        setThemePreference((currentPreference) =>
-            getNextThemePreference(currentPreference),
-        );
+        const nextThemePreference = getNextThemePreference(themePreference);
+
+        setThemePreference(nextThemePreference);
+        showThemeToast(nextThemePreference);
     }
 
     function handleLiquidGlassToggle() {
@@ -315,6 +342,15 @@ export default function App() {
 
     return (
         <div className="page">
+            {themeToast && (
+                <div className="themeToast" role="status" aria-live="polite">
+                    <span className="themeToastIcon" aria-hidden="true">
+                        {THEME_ICONS[themeToast.theme]}
+                    </span>
+                    <span>{themeToast.message}</span>
+                </div>
+            )}
+
             {mustAnswerConsent &&
                 renderConsentModal({
                     onAccept: handleAcceptConsent,
