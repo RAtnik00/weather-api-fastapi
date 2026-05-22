@@ -1035,7 +1035,13 @@
 
 @media (max-width: 700px) {
   .shell {
-    padding: 18px 16px 24px;
+    padding: 14px 10px 22px;
+  }
+
+  .topbar {
+    gap: 14px;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
   }
 
   .currentWeatherHeader {
@@ -1050,10 +1056,28 @@
 
   .forecastCondition {
     grid-column: 1 / 4;
+    gap: 8px;
+  }
+
+  .forecastCondition .muted {
+    overflow-wrap: anywhere;
   }
 
   .h1 {
-    font-size: 30px;
+    font-size: 28px;
+  }
+
+  .sub {
+    margin-top: 4px;
+    font-size: 14px;
+  }
+
+  .city {
+    font-size: 20px;
+  }
+
+  .desc {
+    font-size: 14px;
   }
 
   .temp {
@@ -1082,6 +1106,7 @@
     grid-template-columns: 1fr auto auto;
     gap: 6px 12px;
     align-items: start;
+    min-width: 0;
     padding: 12px;
     border: 1px solid var(--line-subtle);
     border-radius: 14px;
@@ -1293,7 +1318,7 @@
 
 @media (max-width: 700px) {
   .shell {
-    padding: 16px 12px 24px;
+    padding: 14px 10px 22px;
   }
 
   .themeToast {
@@ -1304,15 +1329,34 @@
   }
 
   .topbarActions {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 44px 44px minmax(0, 1fr);
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
+    width: 100%;
   }
 
   .searchWrap,
   .search {
     width: 100%;
     min-width: 0;
+  }
+
+  .search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .searchInput {
+    min-width: 0;
+    height: 44px;
+    padding: 0 12px;
+  }
+
+  .searchBtn {
+    height: 44px;
+    padding: 0 12px;
   }
 
   .themeToggle {
@@ -1328,5 +1372,29 @@
   .card {
     border-radius: 16px;
     padding: 14px;
+  }
+
+  .cardHeader {
+    gap: 10px;
+  }
+
+  .btnRow {
+    gap: 8px;
+  }
+
+  .ghostBtn,
+  .listBtn,
+  .dangerBtn {
+    min-height: 42px;
+  }
+
+  .favoriteRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .clearAllBtn {
+    min-height: 34px;
+    padding: 6px 9px;
   }
 }
