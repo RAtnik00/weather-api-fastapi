@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { mockCurrentWeather, mockForecast } from '@/constants/mockWeather';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 
 export default function HomeScreen() {
@@ -27,25 +28,31 @@ export default function HomeScreen() {
           <ThemedView type="backgroundElement" style={styles.currentCard}>
             <View>
               <ThemedText type="subtitle">Current</ThemedText>
-              <ThemedText themeColor="textSecondary">Warsaw</ThemedText>
+              <ThemedText themeColor="textSecondary">{mockCurrentWeather.city}</ThemedText>
             </View>
 
-            <ThemedText style={styles.temperature}>5°</ThemedText>
+            <ThemedText style={styles.temperature}>{mockCurrentWeather.temperature}°</ThemedText>
 
             <View style={styles.weatherDetails}>
-              <ThemedText themeColor="textSecondary">Clear sky</ThemedText>
-              <ThemedText themeColor="textSecondary">Feels like: 3°</ThemedText>
-              <ThemedText themeColor="textSecondary">Wind: 2 km/h</ThemedText>
+              <ThemedText themeColor="textSecondary">{mockCurrentWeather.description}</ThemedText>
+              <ThemedText themeColor="textSecondary">
+                Feels like: {mockCurrentWeather.feelsLike}°
+              </ThemedText>
+              <ThemedText themeColor="textSecondary">
+                Wind: {mockCurrentWeather.windSpeed} km/h
+              </ThemedText>
             </View>
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.sectionCard}>
             <ThemedText type="subtitle">5-day forecast</ThemedText>
             <View style={styles.forecastList}>
-              {['Today', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                <View key={day} style={styles.forecastRow}>
-                  <ThemedText>{day}</ThemedText>
-                  <ThemedText themeColor="textSecondary">5° / 12°</ThemedText>
+              {mockForecast.map((forecastDay) => (
+                <View key={forecastDay.day} style={styles.forecastRow}>
+                  <ThemedText>{forecastDay.day}</ThemedText>
+                  <ThemedText themeColor="textSecondary">
+                    {forecastDay.min}° / {forecastDay.max}°
+                  </ThemedText>
                 </View>
               ))}
             </View>
