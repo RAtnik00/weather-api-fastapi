@@ -1,98 +1,125 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
+import { mockCurrentWeather, mockForecast } from '@/constants/mockWeather';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
 
 export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <ThemedText type="title">Weather</ThemedText>
+            <ThemedText themeColor="textSecondary">Mobile dashboard</ThemedText>
+          </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+          <TextInput
+            placeholder="Search city"
+            placeholderTextColor="#7E8A9A"
+            style={styles.searchInput}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
 
-        {Platform.OS === 'web' && <WebBadge />}
+          <ThemedView type="backgroundElement" style={styles.currentCard}>
+            <View>
+              <ThemedText type="subtitle">Current</ThemedText>
+              <ThemedText themeColor="textSecondary">{mockCurrentWeather.city}</ThemedText>
+            </View>
+
+            <ThemedText style={styles.temperature}>{mockCurrentWeather.temperature}°</ThemedText>
+
+            <View style={styles.weatherDetails}>
+              <ThemedText themeColor="textSecondary">{mockCurrentWeather.description}</ThemedText>
+              <ThemedText themeColor="textSecondary">
+                Feels like: {mockCurrentWeather.feelsLike}°
+              </ThemedText>
+              <ThemedText themeColor="textSecondary">
+                Wind: {mockCurrentWeather.windSpeed} km/h
+              </ThemedText>
+            </View>
+          </ThemedView>
+
+          <ThemedView type="backgroundElement" style={styles.sectionCard}>
+            <ThemedText type="subtitle">5-day forecast</ThemedText>
+            <View style={styles.forecastList}>
+              {mockForecast.map((forecastDay) => (
+                <View key={forecastDay.day} style={styles.forecastRow}>
+                  <ThemedText>{forecastDay.day}</ThemedText>
+                  <ThemedText themeColor="textSecondary">
+                    {forecastDay.min}° / {forecastDay.max}°
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+          </ThemedView>
+
+          <ThemedView type="backgroundElement" style={styles.sectionCard}>
+            <ThemedText type="subtitle">Saved cities</ThemedText>
+            <ThemedText themeColor="textSecondary">History and favorites will live here.</ThemedText>
+          </ThemedView>
+        </ScrollView>
       </SafeAreaView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+  },
+  content: {
+    width: '100%',
     maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
+    alignSelf: 'center',
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: BottomTabInset + Spacing.four,
+    gap: Spacing.three,
+  },
+  header: {
+    gap: Spacing.one,
+  },
+  searchInput: {
+    minHeight: 52,
+    borderRadius: 18,
+    paddingHorizontal: Spacing.three,
+    fontSize: 17,
+    backgroundColor: '#F0F4FA',
+    color: '#111827',
+  },
+  currentCard: {
+    gap: Spacing.three,
+    borderRadius: 28,
+    padding: Spacing.four,
+  },
+  temperature: {
+    fontSize: 72,
+    lineHeight: 78,
+    fontWeight: '700',
+  },
+  weatherDetails: {
+    gap: Spacing.one,
+  },
+  sectionCard: {
+    gap: Spacing.three,
+    borderRadius: 24,
+    padding: Spacing.three,
+  },
+  forecastList: {
+    gap: Spacing.two,
+  },
+  forecastRow: {
+    minHeight: 44,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });
