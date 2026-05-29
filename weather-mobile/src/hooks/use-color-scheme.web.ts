@@ -7,7 +7,7 @@ export function useColorScheme() {
   useEffect(() => {
     requestAnimationFrame(() => {
       setHasHydrated(true);
-    })
+    });
   }, []);
 
   const colorScheme = useRNColorScheme();
