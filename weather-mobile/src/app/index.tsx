@@ -1,9 +1,10 @@
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CurrentWeatherCard } from '@/components/CurrentWeatherCard';
 import { ForecastCard } from '@/components/ForecastCard';
 import { SavedCitiesCard } from '@/components/SavedCitiesCard';
+import { SearchInput } from '@/components/SearchInput';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { mockCurrentWeather, mockForecast } from '@/constants/mockWeather';
@@ -22,11 +23,7 @@ export default function HomeScreen() {
             <ThemedText themeColor="textSecondary">Mobile dashboard</ThemedText>
           </View>
 
-          <TextInput
-            placeholder="Search city"
-            placeholderTextColor="#7E8A9A"
-            style={styles.searchInput}
-          />
+          <SearchInput />
 
           <CurrentWeatherCard weather={mockCurrentWeather} />
 
@@ -57,13 +54,5 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: Spacing.one,
-  },
-  searchInput: {
-    minHeight: 52,
-    borderRadius: 18,
-    paddingHorizontal: Spacing.three,
-    fontSize: 17,
-    backgroundColor: '#F0F4FA',
-    color: '#111827',
   },
 });
