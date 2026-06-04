@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CurrentWeatherCard } from '@/components/CurrentWeatherCard';
 import { ForecastCard } from '@/components/ForecastCard';
+import { SavedCitiesCard } from '@/components/SavedCitiesCard';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { mockCurrentWeather, mockForecast } from '@/constants/mockWeather';
@@ -31,10 +32,7 @@ export default function HomeScreen() {
 
           <ForecastCard forecast={mockForecast} />
 
-          <ThemedView type="backgroundElement" style={styles.sectionCard}>
-            <ThemedText type="subtitle">Saved cities</ThemedText>
-            <ThemedText themeColor="textSecondary">History and favorites will live here.</ThemedText>
-          </ThemedView>
+          <SavedCitiesCard />
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
@@ -67,10 +65,5 @@ const styles = StyleSheet.create({
     fontSize: 17,
     backgroundColor: '#F0F4FA',
     color: '#111827',
-  },
-  sectionCard: {
-    gap: Spacing.three,
-    borderRadius: 24,
-    padding: Spacing.three,
   },
 });
