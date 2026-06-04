@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CurrentWeatherCard } from '@/components/CurrentWeatherCard';
+import { ForecastCard } from '@/components/ForecastCard';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { mockCurrentWeather, mockForecast } from '@/constants/mockWeather';
@@ -28,19 +29,7 @@ export default function HomeScreen() {
 
           <CurrentWeatherCard weather={mockCurrentWeather} />
 
-          <ThemedView type="backgroundElement" style={styles.sectionCard}>
-            <ThemedText type="subtitle">5-day forecast</ThemedText>
-            <View style={styles.forecastList}>
-              {mockForecast.map((forecastDay) => (
-                <View key={forecastDay.day} style={styles.forecastRow}>
-                  <ThemedText>{forecastDay.day}</ThemedText>
-                  <ThemedText themeColor="textSecondary">
-                    {forecastDay.min}° / {forecastDay.max}°
-                  </ThemedText>
-                </View>
-              ))}
-            </View>
-          </ThemedView>
+          <ForecastCard forecast={mockForecast} />
 
           <ThemedView type="backgroundElement" style={styles.sectionCard}>
             <ThemedText type="subtitle">Saved cities</ThemedText>
@@ -83,14 +72,5 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     borderRadius: 24,
     padding: Spacing.three,
-  },
-  forecastList: {
-    gap: Spacing.two,
-  },
-  forecastRow: {
-    minHeight: 44,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
 });
