@@ -5,7 +5,7 @@ import { CurrentWeatherCard } from '@/components/CurrentWeatherCard';
 import { ForecastCard } from '@/components/ForecastCard';
 import { SavedCitiesCard } from '@/components/SavedCitiesCard';
 import { SearchInput } from '@/components/SearchInput';
-import { WeatherHeader } from "@/components/WeatherHeader";
+import { WeatherHeader } from '@/components/WeatherHeader';
 import { ThemedView } from '@/components/themed-view';
 import { mockCurrentWeather, mockForecast } from '@/constants/mockWeather';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
